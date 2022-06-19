@@ -1,2 +1,39 @@
 # freeDOM
-A fundamental JavaScript library of virtual-DOM, used in dynamic.
+单独的 vDOM 实现库。
+
+## 功能
+
+- 追踪指定的 DOM，并友好地将数据交给用户
+- 优化大量重复的 DOM 操作，复用 DOM
+
+## 没有的功能
+
+- 不支持 MathML
+
+# 开始使用
+
+不需要实例化了，使用 `freeDOM` 进行交互。
+
+# 创建新作用域
+
+freeDOM 会监测的 DOM 子树被称为 `作用域`。
+
+```typescript
+freeDOM.new(element :HTMLElement) :boolean;
+```
+
+|   参数    |                      描述                       |
+| :-------: | :---------------------------------------------: |
+| `options` | 用于更改某些行为，详情请见[实例配置](#实例配置) |
+
+# 版权声明
+
+本软件以 MIT License 协议开源。
+
+©2020-2022 LJM12914
+
+# 互动
+
+- 欢迎提出issue，但请保持冷静的态度和对事不对人的基本道德准则。
+- 请不要在未与我沟通的情况下发起PR，否则PR大概率被拒绝。
+- 随便 fork。
