@@ -23,11 +23,11 @@ module.exports = {
             })
         ]
     },
-    entry: "./src/freedom.ts",
+    entry: "./src/freeDOM.ts",
     devtool: "source-map",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "freedom.min.js"
+        filename: "freeDOM.min.js"
     },
     resolve: {
         extensions: [

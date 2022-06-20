@@ -1,5 +1,5 @@
 {
-    "main": "./dist/freedom.js",
+    "main": "./dist/freeDOM.js",
     "scripts": {
         "build": "webpack --config=webpack.config.js",
         "build: min": "webpack --config=webpack.config-min.js"

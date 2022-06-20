@@ -4,6 +4,10 @@
 */
 export default (()=>{
     return{
+        parseIDOrString(input :HTMLElement | string) :HTMLElement{
+            if(typeof input == "string") return this.e(input) as HTMLElement;
+            else return input;
+        },
         isDescendant(element :HTMLElement, target :HTMLElement) :boolean{
             while(element.tagName != "HTML"){
                 element = element.parentNode! as HTMLElement;
@@ -25,6 +29,11 @@ export default (()=>{
         precisePop(ele :any, array :any[]) :any[] | null{
             if(array.indexOf(ele) === -1) return null;
             return array.splice(array.indexOf(ele), 1);
+        },
+        //递归冻结对象
+        constantize(obj :anyObject) :void{
+            Object.freeze(obj);
+            for(let i = 0; i < Object.keys(obj).length; i++) if(typeof obj[Object.keys(obj)[i]] == "object") this.constantize(obj[Object.keys(obj)[i]]);
         }
     }
 })();

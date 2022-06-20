@@ -4,11 +4,11 @@ module.exports = {
     optimization: {
         minimize: false,
     },
-    entry: "./src/freedom.ts",
+    entry: "./src/freeDOM.ts",
     devtool: "source-map",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "freedom.js"
+        filename: "freeDOM.js"
     },
     resolve: {
         extensions: [
