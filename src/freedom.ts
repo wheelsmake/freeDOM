@@ -11,66 +11,75 @@ interface newArgs{
 }
 interface updateByIDArgs{
     id :string;
-    rootNode :HTMLElement;
+    rootNode :HTMLElement | string;
 }
 interface updateByNodeArgs{
     id :string;
-    rootNode :HTMLElement;
+    rootNode :HTMLElement | string;
 }
 console.warn("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
 class FreeDOM{
-    #instances :freeDOMInstance[] = [];
+    #instances :FreeDOMCore[] = [];
+    #keys :string[] = [];
     #messages :any[] = [];
     constructor(){
         console.warn("creating new FreeDOM instance.");
     }
+    id(id :string) :FreeDOMCore | null{
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === id) return this.#instances[i];
+        return null;
+    }
+    rootNode(rootNode :HTMLElement | string) :FreeDOMCore | null{
+        rootNode = utils.parseIDOrString(rootNode);
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === rootNode) return this.#instances[i];
+        return null;
+    }
     new(args :newArgs) :boolean{
-        if(typeof args.rootNode == "string") args.rootNode = utils.e(args.rootNode) as HTMLElement; //不管乱写了
+        args.rootNode = utils.parseIDOrString(args.rootNode);
         //排除已经是目前作用域或目前作用域子元素的新增
         if(!utils.isInDocument(args.rootNode)){
             console.warn(`${args.rootNode} is not in document.`);
             return false;
         }
-        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(args.rootNode, this.#instances[i].rootNode) || args.rootNode === this.#instances[i].rootNode){
+        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(args.rootNode, this.#instances[i].getRootNode()) || args.rootNode === this.#instances[i].getRootNode()){
             console.warn(`${args.rootNode} is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.`);
             return false;
         }
         //排除原数组中是新增作用域子元素的元素
-        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(this.#instances[i].rootNode, args.rootNode)) utils.precisePop(this.#instances[i].rootNode, this.#instances);
-        this.#instances.push({
-            instance: new FreeDOMCore(this, this.#messages, this.#instances.length, args.rootNode, args.id), //先求值再push，没问题
-            rootNode: args.rootNode,
-            id: args.id
-        });
-        console.log(this.#messages[this.#instances.length - 1]);
+        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(this.#instances[i].getRootNode(), args.rootNode)) utils.precisePop(this.#instances[i].getRootNode(), this.#instances);
+        const key = utils.randoma2z029(20);
+        this.#instances.push(new FreeDOMCore(this, this.#messages, this.#instances.length, args.rootNode, args.id, key));
+        this.#keys.push(key);
         return true;
     }
     existsID(id :string) :HTMLElement | null{
-        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].id === id) return this.#instances[i].rootNode;
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === id) return this.#instances[i].getRootNode();
         return null;
     }
     existsNode(rootNode :HTMLElement) :string | null{
-        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].rootNode === rootNode) return this.#instances[i].id;
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === rootNode) return this.#instances[i].getID();
         return null;
     }
     updateByID(args :updateByIDArgs) :HTMLElement | null{
-        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].id === args.id){
-
-        }
+        args.rootNode = utils.parseIDOrString(args.rootNode);
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === args.id) this.#instances[i].__setRootNodeWithKey__(this.#keys[i], args.rootNode);
         return null;
     }
     updateByNode(args :updateByNodeArgs) :string | null{
-        for(let i = 0; i < this.#instances.length; i++){
-            
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === args.rootNode) this.#instances[i].__setIDWithKey__(this.#keys[i], args.id);
+        return null;
+    }
+    delete(arg :string | HTMLElement) :{id :string, rootNode :HTMLElement} | null{
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === arg || this.#instances[i].getRootNode() === arg){
+            utils.precisePop(this.#instances[i], this.#instances);
+            return{
+                id: this.#instances[i].getID(),
+                rootNode: this.#instances[i].getRootNode()
+            }
         }
         return null;
     }
-    delete(arg :string | HTMLElement) :object | null{
-        for(let i = 0; i < this.#instances.length; i++){
-            
-        }
-        return null;
-    }
+    e(s :string, scope? :HTMLElement | Document) :Node | Node[]{return utils.e(s, scope);}
 }
 utils.constantize(FreeDOM);
 (window as any).FreeDOM = FreeDOM;

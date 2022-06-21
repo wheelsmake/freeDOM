@@ -4,6 +4,11 @@
 */
 export default (()=>{
     return{
+        E(argument? :string, type? :string, value? :any) :never{
+            if(argument === undefined) throw new Error("An error occured.");
+            else throw new Error(`Argument '${argument}' ${type ? `should be a ${type}` : "is invalid"}${value ? `, got ${value}` : ""}.`);
+        },
+        EE(message :any) :never{throw new Error(message);},
         parseIDOrString(input :HTMLElement | string) :HTMLElement{
             if(typeof input == "string") return this.e(input) as HTMLElement;
             else return input;
@@ -14,6 +19,15 @@ export default (()=>{
                 if(element === target) return true; 
             }
             return false;
+        },
+        randoma2z029(length :number) :string{
+            var s :string = "";
+            for(let i = 0; i < length; i++){
+                let r = Math.floor(Math.random() * 36);
+                if(r < 10) s += r;
+                else s += String.fromCharCode(r + 87);
+            }
+            return s;
         },
         e(s :string, scope? :HTMLElement | Document) :Node[] | Node{
             if(scope === undefined || !(scope instanceof HTMLElement)) scope = document;
