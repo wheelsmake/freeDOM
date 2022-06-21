@@ -2,20 +2,22 @@
  * ©2022 LJM12914. https://github.com/openink/freeDOM
  * Licensed under MIT License. https://github.com/openink/freeDOM/blob/main/LICENSE
 */
-import freeDOMCore from "./freeDOM-core";
+import FreeDOMCore from "./freeDOM-core";
+import nodeBase from "./nodeBase";
 declare global{
     type anyObject = Record<string, any>;
     type kvObject = Record<string, string | null>;
-    interface nodeDescription{
-        id :string;
-        type :"element"|"text";
+    interface nodeDescription extends nodeBase{
+        fID :string;
+        type :"e"|"t";
         tagName? :string;
         rendered :boolean;
-        instance? :HTMLElement;
+        instance? :Element | Text;
         attributes :kvObject;
-        isRoot :boolean;
-        parentNode? :string;
-        childNodes :string;
+        parentNodeID? :string;
+        parentNode? :nodeDescription;
+        childNodeIDs? :string[];
+        childNodes? :nodeDescription[];
     }
     class FreeDOM{
         //note:私有成员不能暴露在d.ts中，否则会让typescript误认为将该类传入参数后可以获取到私有成员，然后报错

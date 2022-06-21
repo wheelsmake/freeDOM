@@ -1,4 +1,5 @@
 ﻿import utils from "./utils";
+import nodeBase from "./nodeBase";
 export default class FreeDOMCore{
     #parent :FreeDOM;
     #messages :any[];
@@ -89,6 +90,25 @@ export default class FreeDOMCore{
         });
         cb(p);
     }
+    n(
+        tagNameOrArgs :string | anyObject,
+        attributes :kvObject,
+        parentNodeInfo? :nodeDescription | string | Element,
+        childNodes? :nodeDescription[] | string[] | Element[] | Text[]
+    ){
+        //todo:创建虚拟节点
+    }
+    createElement(tagNameOrArgs :string | anyObject, attributes :kvObject, parentNodeInfo? :nodeDescription | string | Element, childNodes? :nodeDescription[] | string[] | Element[] | Text[]){
+        return this.n(tagNameOrArgs, attributes, parentNodeInfo, childNodes);
+    }
+    ne(){
+        
+    }
+    createElementFromExistNode(){return this.ne();}
+    u(){
+
+    }
+    buildElement(){return this.u();}
     getID() :string{return this.#id;}
     getRootNode() :HTMLElement{return this.#rootNode;}
     __setRootNodeWithKey__(key :string, rootNode :HTMLElement) :HTMLElement | undefined{

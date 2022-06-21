@@ -190,7 +190,10 @@ freeDOM.id("id").render(
 
 ## 普通 API
 
-我们当然也可以用 freeDOM 提供的新命令式 API 构建 vDOM。
+我们当然也可以用 freeDOM 提供的新命令式 API 构建 vDOM。与流行的 JavaScript 框架相近，freeDOM 支持通过 `createElement`（或其简称 `n()`，~~少了一点~~）创建虚拟 DOM 节点。这个 API 还有很多变种方法，它们都有各自的全称和简称：
+
+- `ne()`（`createElementFromExistNode()`）：将真实 DOM 转换为虚拟 DOM。
+- `u()`（`buildElement()`）：将虚拟 DOM 转换为真实 DOM。
 
 # 版权声明
 

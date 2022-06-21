@@ -109,6 +109,17 @@ class FreeDOMCore {
         });
         cb(p);
     }
+    n(tagNameOrArgs, attributes, parentNodeInfo, childNodes) {
+    }
+    createElement(tagNameOrArgs, attributes, parentNodeInfo, childNodes) {
+        return this.n(tagNameOrArgs, attributes, parentNodeInfo, childNodes);
+    }
+    ne() {
+    }
+    createElementFromExistNode() { return this.ne(); }
+    u() {
+    }
+    buildElement() { return this.u(); }
     getID() { return __classPrivateFieldGet(this, _FreeDOMCore_id, "f"); }
     getRootNode() { return __classPrivateFieldGet(this, _FreeDOMCore_rootNode, "f"); }
     __setRootNodeWithKey__(key, rootNode) {
