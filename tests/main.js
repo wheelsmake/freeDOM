@@ -1,8 +1,5 @@
 ﻿var freeDOM = new FreeDOM();
-freeDOM.new({
-    id: "as",
-    rootNode: "#app"
-});
+freeDOM.new("#app","as");
 freeDOM.id("as").render(document=>{
    var a = document.createElement("div");
    a.innerText = "aa";

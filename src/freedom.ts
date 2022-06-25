@@ -4,10 +4,6 @@
 */
 import FreeDOMCore from "./freeDOM-core";
 import utils from "./utils";
-interface newArgs{
-    id :string;
-    rootNode :HTMLElement | string;
-}
 interface updateByIDArgs{
     id :string;
     rootNode :HTMLElement | string;
@@ -33,21 +29,21 @@ class FreeDOM{
         for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === rootNode) return this.#instances[i];
         return null;
     }
-    new(args :newArgs) :boolean{
-        args.rootNode = utils.parseIDOrString(args.rootNode);
+    new(rootNode :HTMLElement | string, id :string) :boolean{
+        rootNode = utils.parseIDOrString(rootNode);
         //排除已经是目前作用域或目前作用域子元素的新增
-        if(!utils.isInDocument(args.rootNode)){
-            console.warn(`${args.rootNode} is not in document.`);
+        if(!utils.isInDocument(rootNode)){
+            console.warn(`${rootNode} is not in document.`);
             return false;
         }
-        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(args.rootNode, this.#instances[i].getRootNode()) || args.rootNode === this.#instances[i].getRootNode()){
-            console.warn(`${args.rootNode} is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.`);
+        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(rootNode, this.#instances[i].getRootNode()) || rootNode === this.#instances[i].getRootNode()){
+            console.warn(`${rootNode} is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.`);
             return false;
         }
         //排除原数组中是新增作用域子元素的元素
-        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(this.#instances[i].getRootNode(), args.rootNode)) utils.precisePop(this.#instances[i].getRootNode(), this.#instances);
+        for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(this.#instances[i].getRootNode(), rootNode)) utils.precisePop(this.#instances[i].getRootNode(), this.#instances);
         const key = utils.randoma2z029(20);
-        this.#instances.push(new FreeDOMCore(this, this.#messages, this.#instances.length, args.rootNode, args.id, key));
+        this.#instances.push(new FreeDOMCore(this, this.#messages, this.#instances.length, rootNode, id, key));
         this.#keys.push(key);
         return true;
     }

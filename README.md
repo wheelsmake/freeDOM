@@ -38,10 +38,7 @@ freeDOM 会监测的 DOM 子树被称为 `作用域`。
 ## 新增
 
 ```typescript
-freeDOM.new({
-    id :string,
-    rootNode :HTMLElement | string
-}) :boolean;
+freeDOM.new(rootNode :HTMLElement | string， id :string) :boolean;
 ```
 
 |    参数    |                            描述                             |
@@ -123,11 +120,9 @@ freeDOM.delete(arg :string | HTMLElement) :{id :string, rootNode :HTMLElement} |
 
 - 删除作用域操作不可逆。请谨慎进行删除操作。
 
-# vDOM API
-
-每个作用域维护一份专有的 vDOM，所以调用 vDOM API 前要获取作用域。
-
 ## 获取作用域
+
+每个作用域维护一份专有的 vDOM，所以调用 API 前要获取作用域。
 
 - 通过 `id` 获取：
 
@@ -151,49 +146,77 @@ freeDOM.rootNode(rootNode :HTMLElement | string) :FreeDOMCore | null;
 
 如果不存在相应作用域则返回 `null`。
 
-## 虚拟机 API
+# API
 
-我们可以完全用原生 JavaScript 操作 DOM 的方式构建 vDOM，实现这一功能的 API 被形象地命名为 `虚拟机 API`。
+创建作用域后即可用 freeDOM 提供的新命令式 API 构建 vDOM。
 
-如果你觉得原生语法非常重要且神圣，并且不在乎它写起来的长度的话，这非常适合你。又如果你已经写好了一份原生操作 DOM 的程序，它就可以通过这个 API 被不做改动地迁移到 freeDOM。
+## 概念
 
-虚拟机 API 的核心方法是 `render()`。它将原生 JavaScript 对真实 DOM 的操作重定向为对 vDOM 对象的操作，然后通过比对新旧 vDOM 对象增量渲染真实 DOM。
-
-向某个特定的作用域的 `render` 方法传入一个以原生 DOM 操作语法与 DOM 交互的函数：
+虚拟 DOM（简称，下同：vDOM）：虚拟 DOM 结构的最小单元。
 
 ```typescript
-freeDOM.id("id").render((arg :Document) => any) :void;
+interface nodeDescription{
+    fID :string;
+    type :"e"|"t";
+    tagName? :string;
+    instance? :Element | Text;
+    attributes :Record<string, string>;
+    parentNodeID? :string;
+    parentNode? :nodeDescription;
+    childNodeIDs? :string[];
+    childNodes? :nodeDescription[];
+}
 ```
 
-|           参数           |    描述    |
-| :----------------------: | :--------: |
-| `(arg :Document) => any` | 执行的函数 |
+|      属性      |                     描述                      |
+| :------------: | :-------------------------------------------: |
+|     `fID`      |       freeDOM 内部该 vDOM 的唯一标识符        |
+|     `type`     | `"e"`：`Element` 的实例；`"t"`：`Text` 的实例 |
+|   `tagName`    |                    标签名                     |
+|   `instance`   |       已渲染的实例，`undefined`：未渲染       |
+|  `attributes`  |                     属性                      |
+| `parentNodeID` |        父元素 `fID`，用于虚拟 DOM 数组        |
+|  `parentNode`  |          父元素实例，用于虚拟 DOM 树          |
+|                |                                               |
+|                |                                               |
 
-例子：
+虚拟 DOM 树：由嵌套虚拟 DOM 组成的对象。嵌套点为 `childNodes`。
+
+虚拟 DOM 数组：由虚拟 DOM 组成的数组，大致相当于拍平了一棵虚拟 DOM 树。
+
+## 性能原理
+
+一个作用域只会有一棵虚拟 DOM 树，其根节点就是所谓 `rootNode`。freeDOM 默认会使用拍平了的 `nodeStore` 和 `nodeDict` 对查找提供帮助。
+
+## API 速览
+
+- `n()`：创建新的 vDOM 树。
+
+- `parse()`：将 DOM 转换为（非游离态）vDOM。
+  - 如果要单纯地将 DOM 转换为游离态的 vDOM，则可使用 [`FreeDOM.parseNode()`](#parseNode)。
+- `sync()`：将 vDOM 同步至 DOM 。这个方法的用途非常少，因为用常规 API 对虚拟 DOM 树进行修改时 freeDOM 会自动同步更改至真实 DOM 树。
+- `rsync()`：将真实 DOM 树同步至虚拟 DOM 树，通常用于处理用户输入。
+- `d()`：比较两个虚拟 DOM 树间的区别，并生成将第一个虚拟 DOM 树变成第二个虚拟 DOM 树的 `转换代码`。
+
+## `n()`
 
 ```typescript
-freeDOM.id("id").render(
-    document=>{
-    	var e = document.createElement("div");
-        e.innerText = "Hello, world!"
-    	var myapp = document.getElementById("app");
-        myapp.append(e);
-        ...
-	}
-);
+freeDOM.id("id").n("")
 ```
 
-需要注意的是，该函数中的 `document` **不是全局作用域的 `document` 对象，而是一个普通的参数**。实际上它是一个全局 `document` 对象的 `Proxy`。freeDOM 在准备好 `Proxy` 后调用该函数并传入 `Proxy`，用于拦截原生 JavaScript 对真实 DOM 的操作。
 
-- 不允许在该函数中修改 `document` 对象。事实上该函数中的 `document` 只允许少量常规的读取操作，**推荐只使用**点表示法和方括号表示法获取 `document` 的属性和方法。除此之外仅支持 `has`、`isExtensible`、`ownkeys` 和 `getPrototypeOf`，freeDOM 会在访问这些方法时抛出一个警告，并且原封不动地返回数据。freeDOM **完全拦截**其他所有 `Proxy` 可能代理的方法。
-- LJM12914 习惯以 `方法` 命名静态的、现成的 `function`，而以 `函数` 命名动态的、以参数形式传递的、运行时生成的 `function`。
 
-## 普通 API
+# 工具方法
 
-我们当然也可以用 freeDOM 提供的新命令式 API 构建 vDOM。与流行的 JavaScript 框架相近，freeDOM 支持通过 `createElement`（或其简称 `n()`，~~少了一点~~）创建虚拟 DOM 节点。这个 API 还有很多变种方法，它们都有各自的全称和简称：
+## parseNode
 
-- `ne()`（`createElementFromExistNode()`）：将真实 DOM 转换为虚拟 DOM。
-- `u()`（`buildElement()`）：将虚拟 DOM 转换为真实 DOM。
+将真实 DOM 对象转换为 freeDOM 的虚拟 DOM 对象。
+
+```typescript
+freeDOM.parseNode(element :Element);
+```
+
+
 
 # 版权声明
 

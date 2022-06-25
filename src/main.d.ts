@@ -3,30 +3,30 @@
  * Licensed under MIT License. https://github.com/openink/freeDOM/blob/main/LICENSE
 */
 import FreeDOMCore from "./freeDOM-core";
-import nodeBase from "./nodeBase";
 declare global{
     type anyObject = Record<string, any>;
     type kvObject = Record<string, string | null>;
-    interface nodeDescription extends nodeBase{
+    type nNullkvObject = Record<string, string>;
+    interface nodeDescription{
         fID :string;
         type :"e"|"t";
         tagName? :string;
-        rendered :boolean;
         instance? :Element | Text;
-        attributes :kvObject;
+        attributes :nNullkvObject;
         parentNodeID? :string;
         parentNode? :nodeDescription;
         childNodeIDs? :string[];
         childNodes? :nodeDescription[];
     }
+    interface nodeTree{
+
+    }
+    type nodeStore = nodeDescription[];
     class FreeDOM{
         //note:私有成员不能暴露在d.ts中，否则会让typescript误认为将该类传入参数后可以获取到私有成员，然后报错
-        //#instances :freeDOMCoreInstance[];
-        //#keys :string[];
-        //#messages :any[];
         id :(id :string) => FreeDOMCore | null;
         rootNode :(rootNode :HTMLElement | string) => FreeDOMCore | null;
-        new :(args :newArgs) => boolean;
+        new :(rootNode :HTMLElement | string, id :string) => boolean;
         existsID :(id :string) => HTMLElement | null;
         existsNode :(rootNode :HTMLElement) => string | null;
         updateByID :(args :updateByIDArgs) => HTMLElement | null;
