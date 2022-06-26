@@ -27,6 +27,7 @@ module.exports = {
     devtool: "source-map",
     output: {
         path: path.resolve(__dirname, "dist"),
+        //filename: "freeDOM.min.[contenthash:8].js"
         filename: "freeDOM.min.js"
     },
     resolve: {

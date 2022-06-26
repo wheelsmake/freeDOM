@@ -1,5 +1,5 @@
 # freeDOM
-单独的 vDOM 实现库。
+虚拟 DOM 实现 JavaScript 库。
 
 ## 功能
 
@@ -7,8 +7,7 @@
 
 ## 没有的功能
 
-- 不支持 MathML。
-- 不支持动态渲染、响应式渲染、数据绑定、模板等等，**freeDOM 不是 JavaScript 框架**，而是框架的一部分。它只负责通过 vDOM 管理 DOM。
+不支持动态渲染、响应式渲染、数据绑定、模板等等，**freeDOM 不是 JavaScript 框架**，而是框架的一部分。它只负责通过 vDOM 管理 DOM。
 
 ## 特性
 
@@ -38,7 +37,10 @@ freeDOM 会监测的 DOM 子树被称为 `作用域`。
 ## 新增
 
 ```typescript
-freeDOM.new(rootNode :HTMLElement | string， id :string) :boolean;
+freeDOM.new({
+    id :string,
+    rootNode :Element | string
+}) :boolean;
 ```
 
 |    参数    |                            描述                             |
@@ -46,12 +48,12 @@ freeDOM.new(rootNode :HTMLElement | string， id :string) :boolean;
 | `rootNode` | 作用域的根节点或根节点的 `id` 属性（以 `#element-id` 形式） |
 |    `id`    |                     作用域的唯一标识符                      |
 
-如果创建成功，则返回 `true`，否则返回 `false`。创建失败的情况通常可能是：新作用域是某一已注册作用域的子作用域；传入了不在页面中的节点；`id` 不是唯一的。
+如果创建成功，则返回 `true`，否则返回 `false`。创建失败的情况通常可能是：新作用域是某一已注册作用域或某一已注册作用域的子作用域；传入了未挂载到页面中的节点（为了防止误操作而限制）；`id` 不是唯一的。
 
 ## 按 `id` 查询
 
 ```typescript
-freeDOM.existsID(id :string) :HTMLElement | null;
+freeDOM.existsID(id :string) :Element | null;
 ```
 
 | 参数 |        描述        |
@@ -63,7 +65,7 @@ freeDOM.existsID(id :string) :HTMLElement | null;
 ## 按根节点查询
 
 ```typescript
-freeDOM.existsNode(rootNode :HTMLElement | string) :string | null;
+freeDOM.existsNode(rootNode :Element | string) :string | null;
 ```
 
 |    参数    |                            描述                             |
@@ -77,8 +79,8 @@ freeDOM.existsNode(rootNode :HTMLElement | string) :string | null;
 ```typescript
 freeDOM.updateByID({
     id :string,
-    rootNode :HTMLElement | string
-}) :HTMLElement | null;
+    rootNode :Element | string
+}) :Element | null;
 ```
 
 |    参数    |                             描述                             |
@@ -93,7 +95,7 @@ freeDOM.updateByID({
 ```typescript
 freeDOM.updateByNode({
     id :string,
-    rootNode :HTMLElement | string
+    rootNode :Element | string
 }) :string | null;
 ```
 
@@ -107,7 +109,7 @@ freeDOM.updateByNode({
 ## 删除
 
 ```typescript
-freeDOM.delete(arg :string | HTMLElement) :{id :string, rootNode :HTMLElement} | null;
+freeDOM.delete(arg :string | Element) :{id :string, rootNode :Element} | null;
 ```
 
 | 参数  |            描述            |
@@ -116,9 +118,9 @@ freeDOM.delete(arg :string | HTMLElement) :{id :string, rootNode :HTMLElement} |
 
 如存在相应唯一标识符或根节点则删除作用域并返回作用域对象，不存在则返回 `null`。
 
-不允许传入根节点的 `id` 属性（以 `#element-id` 形式）。
+因为根节点的 `id` 属性和唯一标识符都是字符串，会造成歧义，所以不允许传入根节点的 `id` 属性。
 
-- 删除作用域操作不可逆。请谨慎进行删除操作。
+- 删除作用域操作不可逆。所有相关数据都将被删除。请谨慎进行删除操作。
 
 ## 获取作用域
 
@@ -137,7 +139,7 @@ freeDOM.id(id :string) :FreeDOMCore | null;
 - 通过 `rootNode` 获取：
 
 ```typescript
-freeDOM.rootNode(rootNode :HTMLElement | string) :FreeDOMCore | null;
+freeDOM.rootNode(rootNode :Element | string) :FreeDOMCore | null;
 ```
 
 |    参数    |                           描述                            |
@@ -146,77 +148,104 @@ freeDOM.rootNode(rootNode :HTMLElement | string) :FreeDOMCore | null;
 
 如果不存在相应作用域则返回 `null`。
 
-# API
+- `FreeDOMCore` 是作用域的类名。
+
+# vDOM API
 
 创建作用域后即可用 freeDOM 提供的新命令式 API 构建 vDOM。
 
 ## 概念
 
-虚拟 DOM（简称，下同：vDOM）：虚拟 DOM 结构的最小单元。
+虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。
 
 ```typescript
 interface nodeDescription{
-    fID :string;
-    type :"e"|"t";
     tagName? :string;
-    instance? :Element | Text;
+    instance :Element | Text | null;
     attributes :Record<string, string>;
     parentNodeID? :string;
-    parentNode? :nodeDescription;
     childNodeIDs? :string[];
-    childNodes? :nodeDescription[];
+    childNodes :Array<nodeDescription | string>;
 }
 ```
 
-|      属性      |                     描述                      |
-| :------------: | :-------------------------------------------: |
-|     `fID`      |       freeDOM 内部该 vDOM 的唯一标识符        |
-|     `type`     | `"e"`：`Element` 的实例；`"t"`：`Text` 的实例 |
-|   `tagName`    |                    标签名                     |
-|   `instance`   |       已渲染的实例，`undefined`：未渲染       |
-|  `attributes`  |                     属性                      |
-| `parentNodeID` |        父元素 `fID`，用于虚拟 DOM 数组        |
-|  `parentNode`  |          父元素实例，用于虚拟 DOM 树          |
-|                |                                               |
-|                |                                               |
+|      属性      |                     描述                     |
+| :------------: | :------------------------------------------: |
+|   `tagName`    |                    标签名                    |
+|   `instance`   |         已渲染的实例，`null`：未渲染         |
+|  `attributes`  |                     属性                     |
+| `parentNodeID` |       父元素 `fID`，用于虚拟 DOM 数组        |
+| `childNodeIDs` |           子元素中为 vDOM 的 `fID`           |
+|  `childNodes`  | 子元素数组，文本节点为 `string`，否则为 vDOM |
 
-虚拟 DOM 树：由嵌套虚拟 DOM 组成的对象。嵌套点为 `childNodes`。
+vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `childNodes`。
 
-虚拟 DOM 数组：由虚拟 DOM 组成的数组，大致相当于拍平了一棵虚拟 DOM 树。
+vDOM 字典（`nodeStore`）：freeDOM 中 vDOM 树不只是以树的形式存储，还将作用域下所有 vDOM（因为是对象所以两边都是引用，值并不会复制）放到一个对象中，其键名即为随机生成的唯一标识符 `fID`，用于快速遍历 vDOM 树。
 
-## 性能原理
-
-一个作用域只会有一棵虚拟 DOM 树，其根节点就是所谓 `rootNode`。freeDOM 默认会使用拍平了的 `nodeStore` 和 `nodeDict` 对查找提供帮助。
+- 根节点的 `fID` 永远是 `"rootNode"`。
 
 ## API 速览
 
-- `n()`：创建新的 vDOM 树。
+- `sync()`：将 vDOM 树同步至 DOM 树。这个方法的用途非常少，因为用常规 API 对 vDOM 树进行修改时 freeDOM 会自动同步更改至 DOM 树。
+- `rsync()`：将真实 DOM 树同步至 vDOM 树，通常用于处理用户输入。
+- `d()`：比较两个 vDOM 树间的区别，并生成将第一个 vDOM 树变成第二个 vDOM 树的 `转换代码`。
 
-- `parse()`：将 DOM 转换为（非游离态）vDOM。
-  - 如果要单纯地将 DOM 转换为游离态的 vDOM，则可使用 [`FreeDOM.parseNode()`](#parseNode)。
-- `sync()`：将 vDOM 同步至 DOM 。这个方法的用途非常少，因为用常规 API 对虚拟 DOM 树进行修改时 freeDOM 会自动同步更改至真实 DOM 树。
-- `rsync()`：将真实 DOM 树同步至虚拟 DOM 树，通常用于处理用户输入。
-- `d()`：比较两个虚拟 DOM 树间的区别，并生成将第一个虚拟 DOM 树变成第二个虚拟 DOM 树的 `转换代码`。
+# 管理 API
 
-## `n()`
+## 获取信息
+
+获取作用域的 ID：
 
 ```typescript
-freeDOM.id("id").n("")
+freeDOM.id("id").getID() :string; //"id"
 ```
 
+> 听君一席话，如听一席话。
 
+获取作用域的 rootNode：
+
+```typescript
+freeDOM.rootNode("rootNodeID").getRootNode() :Element; //"#rootNodeID"
+```
+
+> 还是听君一席话，如听一席话。
+
+不过交换着用就有意义了。
+
+## 不应使用的方法
+
+在作用域实例中，以 `__` 作为开头和结尾的方法不应在 freeDOM 外部使用。这些方法都需要验证创建作用域实例时提供的 `key` 才能工作，因此外部也无法正常调用。
 
 # 工具方法
 
+## e
+
+> 开发者拥有选择 DOM 的权利。
+
+```typescript
+freeDOM.e(s :string, scope? :Element | Document) :Node | Node[];
+```
+
+|  属性   |                     描述                      |
+| :-----: | :-------------------------------------------: |
+|   `s`   |                  css 选择器                   |
+| `scope` | `querySelector` 的作用域，不填默认 `document` |
+
+仅当传入选择器的最终选择器为 ID 选择器（即 `#` ）且获取到元素时返回 `Node` 类型单个元素，否则返回  `Node[]` 类型。
+
 ## parseNode
 
-将真实 DOM 对象转换为 freeDOM 的虚拟 DOM 对象。
+将 DOM 对象转换为（游离的）vDOM 对象。
 
 ```typescript
 freeDOM.parseNode(element :Element);
 ```
 
 
+
+## buildNode
+
+将（游离的）vDOM 对象转换为 DOM 对象。
 
 # 版权声明
 

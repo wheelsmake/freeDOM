@@ -24,102 +24,29 @@ var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || 
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FreeDOMCore_parent, _FreeDOMCore_messages, _FreeDOMCore_numeralID, _FreeDOMCore_rootNode, _FreeDOMCore_id, _FreeDOMCore_key, _FreeDOMCore_alerts;
+var _FreeDOMCore_rootNode, _FreeDOMCore_id, _FreeDOMCore_key, _FreeDOMCore_alerts;
 
 class FreeDOMCore {
-    constructor(parent, messages, numeralID, rootNode, id, key) {
-        _FreeDOMCore_parent.set(this, void 0);
-        _FreeDOMCore_messages.set(this, void 0);
-        _FreeDOMCore_numeralID.set(this, void 0);
+    constructor(rootNode, id, key) {
         _FreeDOMCore_rootNode.set(this, void 0);
         _FreeDOMCore_id.set(this, void 0);
         _FreeDOMCore_key.set(this, void 0);
         _FreeDOMCore_alerts.set(this, [
             "DO NOT CALL ME FROM OUTSIDE THE FreeDOM, PLUS YOU CANNOT DO ANYTHING WITHOUT SECRET KEY."
         ]);
-        __classPrivateFieldSet(this, _FreeDOMCore_parent, parent, "f");
-        __classPrivateFieldSet(this, _FreeDOMCore_messages, messages, "f");
-        __classPrivateFieldSet(this, _FreeDOMCore_numeralID, numeralID, "f");
         __classPrivateFieldSet(this, _FreeDOMCore_rootNode, rootNode, "f");
         __classPrivateFieldSet(this, _FreeDOMCore_id, id, "f");
         __classPrivateFieldSet(this, _FreeDOMCore_key, key, "f");
     }
-    render(cb) {
-        var alerts = [
-            "CANNOT CHANGE THE DOCUMENT OBJECT IN THE PROXY.",
-            "DONT USE THIS IN THE PROXY IN ORDER TO PREVENT UNKNOWN BUGS."
-        ];
-        const p = new Proxy(document, {
-            get(document, property, receiver) {
-                if (property in document) {
-                    const fuck_typescript = document[property];
-                    if (fuck_typescript instanceof Function) {
-                        return new Proxy(fuck_typescript, {
-                            apply(target, thisArg, argArray) {
-                                return target.bind(document)(...argArray);
-                            }
-                        });
-                    }
-                    else
-                        return fuck_typescript;
-                }
-                else
-                    return undefined;
-            },
-            has(document, property) {
-                console.warn(alerts[1]);
-                return Reflect.has(document, property);
-            },
-            isExtensible(document) {
-                console.warn(alerts[1]);
-                return Reflect.isExtensible(document);
-            },
-            getPrototypeOf(document) {
-                console.warn(alerts[1]);
-                return Reflect.getPrototypeOf(document);
-            },
-            ownKeys(document) {
-                console.warn(alerts[1]);
-                return Reflect.ownKeys(document);
-            },
-            setPrototypeOf(document, value) {
-                console.warn(alerts[0]);
-                return false;
-            },
-            set(document, property, value, receiver) {
-                console.warn(alerts[0]);
-                return false;
-            },
-            defineProperty(document, property, attributes) {
-                console.warn(alerts[0]);
-                return false;
-            },
-            deleteProperty(document, property) {
-                console.warn(alerts[0]);
-                return false;
-            },
-            preventExtensions(document) {
-                console.warn(alerts[0]);
-                return false;
-            },
-            getOwnPropertyDescriptor(document, property) {
-                console.warn(alerts[0]);
-                return undefined;
-            }
-        });
-        cb(p);
+    n() {
     }
-    n(tagNameOrArgs, attributes, parentNodeInfo, childNodes) {
+    h() { return this.n(); }
+    sync() {
     }
-    createElement(tagNameOrArgs, attributes, parentNodeInfo, childNodes) {
-        return this.n(tagNameOrArgs, attributes, parentNodeInfo, childNodes);
+    rsync() {
     }
-    ne() {
+    d() {
     }
-    createElementFromExistNode() { return this.ne(); }
-    u() {
-    }
-    buildElement() { return this.u(); }
     getID() { return __classPrivateFieldGet(this, _FreeDOMCore_id, "f"); }
     getRootNode() { return __classPrivateFieldGet(this, _FreeDOMCore_rootNode, "f"); }
     __setRootNodeWithKey__(key, rootNode) {
@@ -128,7 +55,7 @@ class FreeDOMCore {
             return __classPrivateFieldGet(this, _FreeDOMCore_rootNode, "f");
         }
         else
-            _utils__WEBPACK_IMPORTED_MODULE_0__["default"].EE(__classPrivateFieldGet(this, _FreeDOMCore_alerts, "f")[0]);
+            _utils__WEBPACK_IMPORTED_MODULE_0__.EE(__classPrivateFieldGet(this, _FreeDOMCore_alerts, "f")[0]);
     }
     __setIDWithKey__(key, id) {
         if (key === __classPrivateFieldGet(this, _FreeDOMCore_key, "f")) {
@@ -136,10 +63,10 @@ class FreeDOMCore {
             return __classPrivateFieldGet(this, _FreeDOMCore_id, "f");
         }
         else
-            _utils__WEBPACK_IMPORTED_MODULE_0__["default"].EE(__classPrivateFieldGet(this, _FreeDOMCore_alerts, "f")[0]);
+            _utils__WEBPACK_IMPORTED_MODULE_0__.EE(__classPrivateFieldGet(this, _FreeDOMCore_alerts, "f")[0]);
     }
 }
-_FreeDOMCore_parent = new WeakMap(), _FreeDOMCore_messages = new WeakMap(), _FreeDOMCore_numeralID = new WeakMap(), _FreeDOMCore_rootNode = new WeakMap(), _FreeDOMCore_id = new WeakMap(), _FreeDOMCore_key = new WeakMap(), _FreeDOMCore_alerts = new WeakMap();
+_FreeDOMCore_rootNode = new WeakMap(), _FreeDOMCore_id = new WeakMap(), _FreeDOMCore_key = new WeakMap(), _FreeDOMCore_alerts = new WeakMap();
 
 
 /***/ }),
@@ -152,69 +79,100 @@ _FreeDOMCore_parent = new WeakMap(), _FreeDOMCore_messages = new WeakMap(), _Fre
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "E": () => (/* binding */ E),
+/* harmony export */   "EE": () => (/* binding */ EE),
+/* harmony export */   "checkNode": () => (/* binding */ checkNode),
+/* harmony export */   "constantize": () => (/* binding */ constantize),
+/* harmony export */   "e": () => (/* binding */ e),
+/* harmony export */   "isDescendant": () => (/* binding */ isDescendant),
+/* harmony export */   "isInDocument": () => (/* binding */ isInDocument),
+/* harmony export */   "nouse": () => (/* binding */ nouse),
+/* harmony export */   "precisePop": () => (/* binding */ precisePop),
+/* harmony export */   "randoma2Z": () => (/* binding */ randoma2Z),
+/* harmony export */   "randoma2Z029": () => (/* binding */ randoma2Z029),
+/* harmony export */   "reduceToElement": () => (/* binding */ reduceToElement)
 /* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((() => {
-    return {
-        E(argument, type, value) {
-            if (argument === undefined)
-                throw new Error("An error occured.");
-            else
-                throw new Error(`Argument '${argument}' ${type ? `should be a ${type}` : "is invalid"}${value ? `, got ${value}` : ""}.`);
-        },
-        EE(message) { throw new Error(message); },
-        parseIDOrString(input) {
-            if (typeof input == "string")
-                return this.e(input);
-            else
-                return input;
-        },
-        isDescendant(element, target) {
-            while (element.tagName != "HTML") {
-                element = element.parentNode;
-                if (element === target)
-                    return true;
-            }
-            return false;
-        },
-        randoma2z029(length) {
-            var s = "";
-            for (let i = 0; i < length; i++) {
-                let r = Math.floor(Math.random() * 36);
-                if (r < 10)
-                    s += r;
-                else
-                    s += String.fromCharCode(r + 87);
-            }
-            return s;
-        },
-        e(s, scope) {
-            if (scope === undefined || !(scope instanceof HTMLElement))
-                scope = document;
-            let a = scope.querySelectorAll(s);
-            if (!a.length)
-                return [];
-            if (a.length == 1 && s.match(/^.*#[^\s]*$/))
-                return a[0];
-            else
-                return Array.from(a);
-        },
-        isInDocument(element) {
-            return this.isDescendant(element, this.e("html")[0]);
-        },
-        precisePop(ele, array) {
-            if (array.indexOf(ele) === -1)
-                return null;
-            return array.splice(array.indexOf(ele), 1);
-        },
-        constantize(obj) {
-            Object.freeze(obj);
-            for (let i = 0; i < Object.keys(obj).length; i++)
-                if (typeof obj[Object.keys(obj)[i]] == "object")
-                    this.constantize(obj[Object.keys(obj)[i]]);
-        }
-    };
-})());
+function checkNode(node) {
+    if (node instanceof Text)
+        return "Text";
+    else if (node instanceof HTMLElement)
+        return "HTMLElement";
+    else if (node instanceof SVGElement)
+        return "SVGElement";
+    else
+        return false;
+}
+function reduceToElement(input) {
+    if (typeof input == "string")
+        return e(input);
+    else
+        return input;
+}
+function isDescendant(element, target) {
+    while (element.tagName != "HTML") {
+        element = element.parentNode;
+        if (element === target)
+            return true;
+    }
+    return false;
+}
+function randoma2Z(length) {
+    var s = "";
+    for (let i = 0; i < length; i++) {
+        let r = Math.floor(Math.random() * 52);
+        if (r > 25)
+            s += String.fromCharCode(r + 71);
+        else
+            s += String.fromCharCode(r + 65);
+    }
+    return s;
+}
+function randoma2Z029(length) {
+    var s = "";
+    for (let i = 0; i < length; i++) {
+        let r = Math.floor(Math.random() * 36);
+        if (r < 10)
+            s += r;
+        else
+            s += String.fromCharCode(r + 87);
+    }
+    return s;
+}
+function e(s, scope) {
+    if (scope === undefined || !(scope instanceof Element))
+        scope = document;
+    let a = scope.querySelectorAll(s);
+    if (!a.length)
+        return [];
+    if (a.length == 1 && s.match(/^.*#[^\s]*$/))
+        return a[0];
+    else
+        return Array.from(a);
+}
+function isInDocument(element) {
+    return isDescendant(element, e("html")[0]);
+}
+function precisePop(ele, array) {
+    if (array.indexOf(ele) === -1)
+        return null;
+    return array.splice(array.indexOf(ele), 1);
+}
+function constantize(obj) {
+    Object.freeze(obj);
+    for (let i = 0; i < Object.keys(obj).length; i++)
+        if (typeof obj[Object.keys(obj)[i]] == "object")
+            constantize(obj[Object.keys(obj)[i]]);
+}
+function E(argument, type, value) {
+    if (argument === undefined)
+        throw new Error("An error occured.");
+    else
+        throw new Error(`Argument '${argument}' ${type ? `should be a(an) ${type}` : "is invalid"}${value ? `, got ${value}` : ""}.`);
+}
+function EE(message) { throw new Error(message); }
+function nouse() {
+    return 7;
+}
 
 
 /***/ })
@@ -289,7 +247,7 @@ var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || 
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FreeDOM_instances, _FreeDOM_keys, _FreeDOM_messages;
+var _FreeDOM_instances, _FreeDOM_keys;
 
 
 console.warn("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
@@ -297,8 +255,7 @@ class FreeDOM {
     constructor() {
         _FreeDOM_instances.set(this, []);
         _FreeDOM_keys.set(this, []);
-        _FreeDOM_messages.set(this, []);
-        console.warn("creating new FreeDOM instance.");
+        console.log("creating new FreeDOM instance.");
     }
     id(id) {
         for (let i = 0; i < __classPrivateFieldGet(this, _FreeDOM_instances, "f").length; i++)
@@ -307,28 +264,28 @@ class FreeDOM {
         return null;
     }
     rootNode(rootNode) {
-        rootNode = _utils__WEBPACK_IMPORTED_MODULE_1__["default"].parseIDOrString(rootNode);
+        rootNode = _utils__WEBPACK_IMPORTED_MODULE_1__.reduceToElement(rootNode);
         for (let i = 0; i < __classPrivateFieldGet(this, _FreeDOM_instances, "f").length; i++)
             if (__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode() === rootNode)
                 return __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i];
         return null;
     }
     new(args) {
-        args.rootNode = _utils__WEBPACK_IMPORTED_MODULE_1__["default"].parseIDOrString(args.rootNode);
-        if (!_utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInDocument(args.rootNode)) {
-            console.warn(`${args.rootNode} is not in document.`);
+        args.rootNode = _utils__WEBPACK_IMPORTED_MODULE_1__.reduceToElement(args.rootNode);
+        var c = _utils__WEBPACK_IMPORTED_MODULE_1__.checkNode(args.rootNode);
+        if (c != "HTMLElement" && c != "SVGElement")
+            _utils__WEBPACK_IMPORTED_MODULE_1__.E("rootNode", "HTMLElement");
+        if (!_utils__WEBPACK_IMPORTED_MODULE_1__.isInDocument(args.rootNode)) {
+            console.warn(args.rootNode, " is not in document.");
             return false;
         }
         for (let i = 0; i < __classPrivateFieldGet(this, _FreeDOM_instances, "f").length; i++)
-            if (_utils__WEBPACK_IMPORTED_MODULE_1__["default"].isDescendant(args.rootNode, __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode()) || args.rootNode === __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode()) {
-                console.warn(`${args.rootNode} is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.`);
+            if (_utils__WEBPACK_IMPORTED_MODULE_1__.isDescendant(args.rootNode, __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode()) || args.rootNode === __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode()) {
+                console.warn(args.rootNode, " is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.");
                 return false;
             }
-        for (let i = 0; i < __classPrivateFieldGet(this, _FreeDOM_instances, "f").length; i++)
-            if (_utils__WEBPACK_IMPORTED_MODULE_1__["default"].isDescendant(__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode(), args.rootNode))
-                _utils__WEBPACK_IMPORTED_MODULE_1__["default"].precisePop(__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode(), __classPrivateFieldGet(this, _FreeDOM_instances, "f"));
-        const key = _utils__WEBPACK_IMPORTED_MODULE_1__["default"].randoma2z029(20);
-        __classPrivateFieldGet(this, _FreeDOM_instances, "f").push(new _freeDOM_core__WEBPACK_IMPORTED_MODULE_0__["default"](this, __classPrivateFieldGet(this, _FreeDOM_messages, "f"), __classPrivateFieldGet(this, _FreeDOM_instances, "f").length, args.rootNode, args.id, key));
+        const key = _utils__WEBPACK_IMPORTED_MODULE_1__.randoma2Z029(10);
+        __classPrivateFieldGet(this, _FreeDOM_instances, "f").push(new _freeDOM_core__WEBPACK_IMPORTED_MODULE_0__["default"](args.rootNode, args.id, key));
         __classPrivateFieldGet(this, _FreeDOM_keys, "f").push(key);
         return true;
     }
@@ -345,7 +302,7 @@ class FreeDOM {
         return null;
     }
     updateByID(args) {
-        args.rootNode = _utils__WEBPACK_IMPORTED_MODULE_1__["default"].parseIDOrString(args.rootNode);
+        args.rootNode = _utils__WEBPACK_IMPORTED_MODULE_1__.reduceToElement(args.rootNode);
         for (let i = 0; i < __classPrivateFieldGet(this, _FreeDOM_instances, "f").length; i++)
             if (__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getID() === args.id)
                 __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].__setRootNodeWithKey__(__classPrivateFieldGet(this, _FreeDOM_keys, "f")[i], args.rootNode);
@@ -360,7 +317,7 @@ class FreeDOM {
     delete(arg) {
         for (let i = 0; i < __classPrivateFieldGet(this, _FreeDOM_instances, "f").length; i++)
             if (__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getID() === arg || __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode() === arg) {
-                _utils__WEBPACK_IMPORTED_MODULE_1__["default"].precisePop(__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i], __classPrivateFieldGet(this, _FreeDOM_instances, "f"));
+                _utils__WEBPACK_IMPORTED_MODULE_1__.precisePop(__classPrivateFieldGet(this, _FreeDOM_instances, "f")[i], __classPrivateFieldGet(this, _FreeDOM_instances, "f"));
                 return {
                     id: __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getID(),
                     rootNode: __classPrivateFieldGet(this, _FreeDOM_instances, "f")[i].getRootNode()
@@ -368,10 +325,10 @@ class FreeDOM {
             }
         return null;
     }
-    e(s, scope) { return _utils__WEBPACK_IMPORTED_MODULE_1__["default"].e(s, scope); }
+    e(s, scope) { return _utils__WEBPACK_IMPORTED_MODULE_1__.e(s, scope); }
 }
-_FreeDOM_instances = new WeakMap(), _FreeDOM_keys = new WeakMap(), _FreeDOM_messages = new WeakMap();
-_utils__WEBPACK_IMPORTED_MODULE_1__["default"].constantize(FreeDOM);
+_FreeDOM_instances = new WeakMap(), _FreeDOM_keys = new WeakMap();
+_utils__WEBPACK_IMPORTED_MODULE_1__.constantize(FreeDOM);
 window.FreeDOM = FreeDOM;
 
 })();

@@ -4,33 +4,21 @@
 */
 import FreeDOMCore from "./freeDOM-core";
 declare global{
+    interface generalArgs{
+        id :string;
+        rootNode :Element | string;
+    }
     type anyObject = Record<string, any>;
     type kvObject = Record<string, string | null>;
     type nNullkvObject = Record<string, string>;
     interface nodeDescription{
-        fID :string;
-        type :"e"|"t";
-        tagName? :string;
-        instance? :Element | Text;
+        tagName :string;
+        instance :Element | Text | null;
         attributes :nNullkvObject;
         parentNodeID? :string;
-        parentNode? :nodeDescription;
         childNodeIDs? :string[];
-        childNodes? :nodeDescription[];
+        childNodes :Array<nodeDescription | string>;
     }
-    interface nodeTree{
-
-    }
-    type nodeStore = nodeDescription[];
-    class FreeDOM{
-        //note:私有成员不能暴露在d.ts中，否则会让typescript误认为将该类传入参数后可以获取到私有成员，然后报错
-        id :(id :string) => FreeDOMCore | null;
-        rootNode :(rootNode :HTMLElement | string) => FreeDOMCore | null;
-        new :(rootNode :HTMLElement | string, id :string) => boolean;
-        existsID :(id :string) => HTMLElement | null;
-        existsNode :(rootNode :HTMLElement) => string | null;
-        updateByID :(args :updateByIDArgs) => HTMLElement | null;
-        updateByNode :(args :updateByNodeArgs) => string | null;
-        delete :(arg :string | HTMLElement) => {id :string, rootNode :HTMLElement} | null;
-    }
+    type nodeTree = nodeDescription;
+    type nodeStore = Record<string, nodeDescription>;
 }
