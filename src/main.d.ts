@@ -3,22 +3,25 @@
  * Licensed under MIT License. https://github.com/openink/freeDOM/blob/main/LICENSE
 */
 import FreeDOMCore from "./freeDOM-core";
+import vElement from "./vElement";
+import vText from "./vText";
 declare global{
-    interface generalArgs{
+    interface scopeManageArgs{
         id :string;
         rootNode :Element | string;
     }
     type anyObject = Record<string, any>;
     type kvObject = Record<string, string | null>;
     type nNullkvObject = Record<string, string>;
-    interface nodeDescription{
+    /*interface nodeDescription{
+        fID: string;
         tagName :string;
         instance :Element | Text | null;
         attributes :nNullkvObject;
         parentNodeID? :string;
         childNodeIDs? :string[];
-        childNodes :Array<nodeDescription | string>;
-    }
-    type nodeTree = nodeDescription;
-    type nodeStore = Record<string, nodeDescription>;
+        childNodes :Array<>;
+    }*/
+    type nodeTree = vElement;
+    type nodeStore = Record<string, vElement | vText>;
 }

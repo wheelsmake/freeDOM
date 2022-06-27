@@ -1,25 +1,6 @@
 # freeDOM
 虚拟 DOM 实现 JavaScript 库。
 
-## 功能
-
-追踪指定的 DOM，并友好地将数据交给用户 / 高效地将数据交给 DOM。
-
-## 没有的功能
-
-不支持动态渲染、响应式渲染、数据绑定、模板等等，**freeDOM 不是 JavaScript 框架**，而是框架的一部分。它只负责通过 vDOM 管理 DOM。
-
-## 特性
-
-- freeDOM 大量使用了 `Proxy`。
-- freeDOM 的 API 是完全命令式的。
-
-## vDOM
-
-虚拟 DOM（vDOM）是一种通过简化、合并、代理 DOM 操作来达到节约开销或响应式渲染的技术。
-
-vDOM 技术是在浏览器 DOM API 的性能表现不佳并且没有提供响应式渲染的背景下的一种补救性技术。
-
 # 开始使用
 
 实例化。
@@ -32,7 +13,7 @@ const freeDOM = new FreeDOM();
 
 # 作用域
 
-freeDOM 会监测的 DOM 子树被称为 `作用域`。
+freeDOM 会监测的 DOM 子树被称为 `作用域`。每一个 DOM 子树都对应了一个作用域实例。
 
 ## 新增
 
@@ -40,7 +21,7 @@ freeDOM 会监测的 DOM 子树被称为 `作用域`。
 freeDOM.new({
     id :string,
     rootNode :Element | string
-}) :boolean;
+}) :FreeDOMCore | null;
 ```
 
 |    参数    |                            描述                             |
@@ -48,7 +29,9 @@ freeDOM.new({
 | `rootNode` | 作用域的根节点或根节点的 `id` 属性（以 `#element-id` 形式） |
 |    `id`    |                     作用域的唯一标识符                      |
 
-如果创建成功，则返回 `true`，否则返回 `false`。创建失败的情况通常可能是：新作用域是某一已注册作用域或某一已注册作用域的子作用域；传入了未挂载到页面中的节点（为了防止误操作而限制）；`id` 不是唯一的。
+如果创建成功，则返回实例，否则返回 `null`。创建失败的情况通常可能是：新作用域是某一已注册作用域或某一已注册作用域的子作用域；传入了未挂载到页面中的节点（为了防止误操作而限制）；`id` 不是唯一的。
+
+作用域被创建时，freeDOM 会自动以根节点为树根生成 vDOM 树。
 
 ## 按 `id` 查询
 
@@ -124,7 +107,9 @@ freeDOM.delete(arg :string | Element) :{id :string, rootNode :Element} | null;
 
 ## 获取作用域
 
-每个作用域维护一份专有的 vDOM，所以调用 API 前要获取作用域。
+每个作用域维护一份专有的 vDOM，所以调用作用域 API 前要获取作用域实例。
+
+作用域实例在 `new()` 时可以获得，也可以通过下面的方式获得。
 
 - 通过 `id` 获取：
 
@@ -152,14 +137,13 @@ freeDOM.rootNode(rootNode :Element | string) :FreeDOMCore | null;
 
 # vDOM API
 
-创建作用域后即可用 freeDOM 提供的新命令式 API 构建 vDOM。
-
 ## 概念
 
 虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。
 
 ```typescript
 interface nodeDescription{
+    fID :string;
     tagName? :string;
     instance :Element | Text | null;
     attributes :Record<string, string>;
@@ -186,9 +170,57 @@ vDOM 字典（`nodeStore`）：freeDOM 中 vDOM 树不只是以树的形式存�
 
 ## API 速览
 
-- `sync()`：将 vDOM 树同步至 DOM 树。这个方法的用途非常少，因为用常规 API 对 vDOM 树进行修改时 freeDOM 会自动同步更改至 DOM 树。
-- `rsync()`：将真实 DOM 树同步至 vDOM 树，通常用于处理用户输入。
-- `d()`：比较两个 vDOM 树间的区别，并生成将第一个 vDOM 树变成第二个 vDOM 树的 `转换代码`。
+- 作用域内 API
+
+  - `mount()`（`m()`）：将 vDOM 挂载到 vDOM（子）树上。
+  - `unmount()`（`um()`）：将 vDOM 子树从 vDOM（子）树上取下。
+  - `sync()`（`s()`）：将 vDOM（子）树同步至 DOM（子）树。没错，**需要开发者主动同步**，freeDOM 不会自动同步，目的是让开发者自己决定最终渲染的时机，以达到最佳性能，避免重复渲染。当然你也可以直接写 `requestAnimationFrame()` 来调用这个东西。
+
+  - `rsync()`（`rs()`）：将真实 DOM（子）树同步至 vDOM（子）树，通常用于处理用户输入。
+
+- `freeDOM` 内 API
+
+  - `createNode()`（`h()`）：从参数创建 vDOM。
+
+  - `difu()`（`d()`）：比较两个 vDOM 树间的区别，并生成将第一个 vDOM 树变成第二个 vDOM 树的 `转换代码`。
+
+    - > 请忽视这个方法的全称。
+
+  - `parseNode()`（`ne()`）：将 DOM 转换为 vDOM。
+
+  - `buildNode()`（`b()`）：将 vDOM 转换为（游离的）DOM。
+
+## `createNode()`
+
+从参数创建 vDOM。
+
+```typescript
+freeDOM.createNode(
+```
+
+## `difu()`
+
+比较两个 vDOM 树间的区别，并生成将第一个 vDOM 树变成第二个 vDOM 树的 `转换代码`。
+
+```typescript
+freeDOM.difu(
+```
+
+## `parseNode()`
+
+将 DOM 转换为 vDOM。
+
+```typescript
+freeDOM.parseNode(
+```
+
+## `buildNode()`
+
+将 vDOM 转换为（游离的）DOM。
+
+```typescript
+freeDOM.buildNode(
+```
 
 # 管理 API
 
@@ -232,20 +264,6 @@ freeDOM.e(s :string, scope? :Element | Document) :Node | Node[];
 | `scope` | `querySelector` 的作用域，不填默认 `document` |
 
 仅当传入选择器的最终选择器为 ID 选择器（即 `#` ）且获取到元素时返回 `Node` 类型单个元素，否则返回  `Node[]` 类型。
-
-## parseNode
-
-将 DOM 对象转换为（游离的）vDOM 对象。
-
-```typescript
-freeDOM.parseNode(element :Element);
-```
-
-
-
-## buildNode
-
-将（游离的）vDOM 对象转换为 DOM 对象。
 
 # 版权声明
 

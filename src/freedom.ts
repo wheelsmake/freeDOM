@@ -2,8 +2,8 @@
  * ©2022 LJM12914. https://github.com/openink/freeDOM
  * Licensed under MIT License. https://github.com/openink/freeDOM/blob/main/LICENSE
 */
-import FreeDOMCore from "./freeDOM-core";
 import * as utils from "./utils";
+import FreeDOMCore from "./freeDOM-core";
 console.warn("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
 class FreeDOM{
     #instances :FreeDOMCore[] = [];
@@ -11,36 +11,25 @@ class FreeDOM{
     constructor(){
         console.log("creating new FreeDOM instance.");
     }
-    id(id :string) :FreeDOMCore | null{
-        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === id) return this.#instances[i];
-        return null;
-    }
-    rootNode(rootNode :Element | string) :FreeDOMCore | null{
-        rootNode = utils.reduceToElement(rootNode);
-        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === rootNode) return this.#instances[i];
-        return null;
-    }
-    //parseNode(node :Node) :nodeDescription | string{return utils.parseNode(node);}
-    new(args :generalArgs) :boolean{
-        args.rootNode = utils.reduceToElement(args.rootNode);
-        var c = utils.checkNode(args.rootNode);
-        if(c != "HTMLElement" && c != "SVGElement") utils.E("rootNode", "HTMLElement");
+
+    new(args :scopeManageArgs) :FreeDOMCore | null{
+        utils.checkSMArgsnReduce(args);
+        args.rootNode = args.rootNode as Element; //hack:ts真无聊
         //排除已经是目前作用域或目前作用域子元素的新增
         if(!utils.isInDocument(args.rootNode)){
             console.warn(args.rootNode, " is not in document.");
-            return false;
+            return null;
         }
         for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(args.rootNode, this.#instances[i].getRootNode()) || args.rootNode === this.#instances[i].getRootNode()){
             console.warn(args.rootNode, " is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.");
-            return false;
+            return null;
         }
-        //排除原数组中是新增作用域子元素的元素 //note:不能随便删除作用域实例！！！！！
-        //for(let i = 0; i < this.#instances.length; i++) if(utils.isDescendant(this.#instances[i].getRootNode(), args.rootNode)) utils.precisePop(this.#instances[i].getRootNode(), this.#instances);
-        
+        //note:不能随便删除作用域实例！！！！！
         const key = utils.randoma2Z029(10);
-        this.#instances.push(new FreeDOMCore(args.rootNode, args.id, key));
         this.#keys.push(key);
-        return true;
+        const instance = new FreeDOMCore(args.rootNode, args.id, key);
+        this.#instances.push(instance);
+        return instance;
     }
     existsID(id :string) :Element | null{
         for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === id) return this.#instances[i].getRootNode();
@@ -50,12 +39,14 @@ class FreeDOM{
         for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === rootNode) return this.#instances[i].getID();
         return null;
     }
-    updateByID(args :generalArgs) :Element | null{
-        args.rootNode = utils.reduceToElement(args.rootNode);
+    updateByID(args :scopeManageArgs) :Element | null{
+        utils.checkSMArgsnReduce(args);
+        args.rootNode = args.rootNode as Element; //hack:ts真无聊
         for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === args.id) this.#instances[i].__setRootNodeWithKey__(this.#keys[i], args.rootNode);
         return null;
     }
-    updateByNode(args :generalArgs) :string | null{
+    updateByNode(args :scopeManageArgs) :string | null{
+        utils.checkSMArgsnReduce(args);
         for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === args.rootNode) this.#instances[i].__setIDWithKey__(this.#keys[i], args.id);
         return null;
     }
@@ -67,6 +58,15 @@ class FreeDOM{
                 rootNode: this.#instances[i].getRootNode()
             }
         }
+        return null;
+    }
+    id(id :string) :FreeDOMCore | null{
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getID() === id) return this.#instances[i];
+        return null;
+    }
+    rootNode(rootNode :Element | string) :FreeDOMCore | null{
+        rootNode = utils.reduceToElement(rootNode)! as Element; //hack:ts真无聊
+        for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === rootNode) return this.#instances[i];
         return null;
     }
     e(s :string, scope? :Element | Document) :Node | Node[]{return utils.e(s, scope);}

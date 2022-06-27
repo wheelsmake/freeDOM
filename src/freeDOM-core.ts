@@ -1,10 +1,15 @@
-﻿import * as utils from "./utils";
+﻿/* freeDOM
+ * ©2022 LJM12914. https://github.com/openink/freeDOM
+ * Licensed under MIT License. https://github.com/openink/freeDOM/blob/main/LICENSE
+*/
+import * as utils from "./utils";
+import vElement from "./vElement";
 export default class FreeDOMCore{
     #rootNode :Element;
     #id :string;
     #key :string;
     #nodeTree :nodeTree;
-    #nodeStore :nodeStore;
+    #nodeStore :nodeStore = {};
     #alerts = [
         "DO NOT CALL ME FROM OUTSIDE THE FreeDOM, PLUS YOU CANNOT DO ANYTHING WITHOUT SECRET KEY."
     ];
@@ -12,7 +17,7 @@ export default class FreeDOMCore{
         this.#rootNode = rootNode;
         this.#id = id;
         this.#key = key;
-        this.#nodeTree = utils.parseNode(rootNode) as nodeDescription; //rootNode不可能是文本节点，new做过判断了
+        this.#nodeTree = utils.parseNode(rootNode) as vElement; //rootNode不可能是文本节点，new做过判断了
     }
     n(){
         

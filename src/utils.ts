@@ -2,37 +2,40 @@
  * ©2022 LJM12914. https://github.com/openink/freeDOM
  * Licensed under MIT License. https://github.com/openink/freeDOM/blob/main/LICENSE
 */
-export function checkNode(node :Node) :"Text" | "HTMLElement" | "SVGElement" | false{
+import vElement from "./vElement";
+import vText from "./vText";
+export function checkSMArgsnReduce(args :scopeManageArgs) :void{
+    if(typeof args.id != "string") E("id", "string", args.id);
+    args.rootNode = reduceToElement(args.rootNode)!;
+}
+export function reduceToElement(input :Element | string) :Element | undefined/*hack:ts真无聊*/{
+    if(input instanceof Element) return input;
+    else if(typeof input == "string"){
+        const el = e(input);
+        if(el instanceof Node) return el as Element;
+    }
+    else EE(`rootNode string should be a #id selector,but received ${input}.`);
+}
+export function checkNode(node :Node) :"Text" | "Element" | false{
     if(node instanceof Text) return "Text";
-    else if(node instanceof HTMLElement) return "HTMLElement";
-    else if(node instanceof SVGElement) return "SVGElement";
+    else if(node instanceof Element) return "Element";
     else return false;
 }
-export function parseNode(node :Node) :nodeDescription | string{
+export function parseNode(node :Node) :vElement | string{
     switch(checkNode(node)){
         case "Text": return (node as Text).textContent || "";
-        case "HTMLElement" || "SVGElement":
-            var vdom :nodeDescription = {
-                tagName: (node as Element).tagName,
-                instance: null,
-                attributes: getAttr(node),
-                childNodes: getChildNodes(node)
-            }
+        case "Element":
             break;
         case false:
             break;
     }
-    return ""; //hack:永远不会走到这里，都怪ts
+    return ""; //hack:永远不会走到这里
 }
 export function getAttr(element :Element) :nNullkvObject{
     if(checkNode(element) == "Text") E("element", "Element", element);
 }
-export function getChildNodes(element :Element) :Array<nodeDescription | string>{
-
-}
-export function reduceToElement(input :Element | string) :Element{
-    if(typeof input == "string") return e(input) as Element;
-    else return input;
+export function getChildNodes(element :Element) :Array<vElement | vText>{
+    
 }
 export function isDescendant(element :Element, target :Element) :boolean{
     while(element.tagName != "HTML"){
@@ -84,6 +87,3 @@ export function E(argument? :string, type? :string, value? :any) :never{
     else throw new Error(`Argument '${argument}' ${type ? `should be a(an) ${type}` : "is invalid"}${value ? `, got ${value}` : ""}.`);
 }
 export function EE(message :any) :never{throw new Error(message);}
-export function nouse(){
-    return 7;
-}
