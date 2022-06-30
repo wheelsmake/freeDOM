@@ -1,0 +1,1 @@
+{"version":3,"file":"vText.d.ts","sourceRoot":"","sources":["../../src/vText.ts"],"names":[],"mappings":"AAMA,MAAM,CAAC,OAAO,OAAO,KAAK;;gBAIV,WAAW,EAAE,MAAM,EAAE,QAAQ,CAAC,EAAE,IAAI;IAQhD,OAAO,IAAI;QAAC,WAAW,EAAE,MAAM,CAAC;QAAC,QAAQ,EAAE,IAAI,GAAG,SAAS,CAAC;KAAC;CAOhE"}
