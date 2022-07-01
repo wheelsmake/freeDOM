@@ -11,8 +11,8 @@ export function testNodeType(node :Node) :"Text" | "Element" | false{
     else if(node instanceof Element) return "Element";
     else return false;
 }
-export function createVElementFromData(tagName :string, attributes :nNullkvObject, children :vDOM_A) :vElement{
-    return new vElement(tagName, attributes, children);
+export function createVElementFromData(tagName :string, attr :nNullkvObject, children :vDOM_A) :vElement{
+    return new vElement(tagName, attr, children);
 }
 function createVElement(element :Element) :vElement{
     return new vElement(element.tagName.toLocaleLowerCase(), extractAttr(element), getChildren(element), element);
@@ -33,10 +33,16 @@ export function parseNode(node :Node) :vDOM | undefined/*hack:ts真无聊*/{
 }
 export function extractAttr(element :Element) :nNullkvObject{
     const test = testNodeType(element);
-    if(test == "Text" || test === false) utils.generic.E("element", "Element", element); //文本节点不存在attr
+    if(test == "Text" || test === false) utils.generic.E("element", "Element", element, "only Element have attributes"); //文本节点不存在attr
     const attr = element.attributes; //typeof NamedNodeMap
     var result :nNullkvObject = {};
     for(let i = 0; i < attr.length; i++) result[attr[i].name] = attr[i].textContent!; //!：同#L19
+    //fixme:还有事件！！！别忘了事件啊！！！
+    for(let i in element){
+        if(i.indexOf("on") === 0){ //随便吧，还是全等比较好
+            console.log((element as anyObject)[i]);
+        }
+    }
     return result;
 }
 export function getChildren(element :Element/* | Text*/) :vDOM_A{

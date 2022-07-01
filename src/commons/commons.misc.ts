@@ -13,5 +13,5 @@ export function reduceToElement(input :Element | string) :Element | undefined/*h
         const el = utils.element.e(input);
         if(el instanceof Node) return el as Element;
     }
-    else utils.generic.EE(`rootNode string should be a #id selector,but received ${input}.`);
+    else utils.generic.E("rootNode", "string | Element", input, "rootNode should be a #id selector or an Element");
 }

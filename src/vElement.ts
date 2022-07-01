@@ -5,32 +5,26 @@
 import * as utils from "./commons/index";
 export default class vElement{
     #tagName :string;
-    #attributes :nNullkvObject;
-    //#childIDs? :string[];
-    #children :vDOM_A;
+    #attr :nNullkvObject;
     #instance? :Element;
-    //#parent? :vElement;
-    constructor(tagName :string, attributes :nNullkvObject, children :vDOM_A, instance? :Element){
+    #parent? :vElement;
+    #children :vDOM_A;
+    #changed :vEChangeRecord = {};
+    constructor(tagName :string, attr :nNullkvObject, children :vDOM_A, instance? :Element, parent? :vElement){
         this.#tagName = tagName;
-        this.#attributes = attributes;
+        this.#attr = attr;
         this.#children = children;
-        //this.#fID = utils.generic.randoma2Z(10); //144,555,105,949,057,024了，不会撞上吧？
-        if(instance){
-            this.#instance = instance;
-            //if(parent) this.#parent = parent;
-            //else utils.generic.E("parent", "vElement", parent); //note:如果这个是根节点，那么就不需要搞parent了
-            //else this.#fID = "rootNode";
-        }
+        if(instance) this.#instance = instance;
+        if(parent) this.#parent = parent;
 /**/}
 //////CRUD
-/**/getInfo() :{tagName: string; attributes: nNullkvObject; children: vDOM_A; instance: Element | undefined;}{
+/**/getInfo() :{tagName: string; attr: nNullkvObject; instance?: Element; parent?: vElement; children: vDOM_A;}{
         return{
             tagName: this.#tagName,
-            attributes: this.#attributes,
-            children: this.#children,
-            instance: this.#instance
+            attr: this.#attr,
+            instance: this.#instance,
+            parent: this.#parent,
+            children: this.#children
         }
     }
-    //__getParent__() :string | undefined{return this.#parentID;}
-    //__getID__() :string{return this.#fID;}
 }

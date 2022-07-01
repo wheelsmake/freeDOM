@@ -10,6 +10,12 @@ declare global{
         id :string;
         rootNode :Element | string;
     }
+    interface vEChangeRecord{
+
+    }
+    interface vTChangeRecord{
+
+    }
     type anyObject = Record<string, any>;
     type kvObject = Record<string, string | null>;
     type nNullkvObject = Record<string, string>;

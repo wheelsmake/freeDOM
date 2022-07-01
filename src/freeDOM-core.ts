@@ -9,9 +9,6 @@ export default class FreeDOMCore{
     #id :string;
     #nodeTree :nodeTree;
     #nodeStore :nodeStore = {};
-    #alerts = [
-        "DO NOT CALL ME FROM OUTSIDE THE FreeDOM, PLUS YOU CANNOT DO ANYTHING WITHOUT SECRET KEY."
-    ];
     constructor(rootNode :Element, id :string){
         this.#rootNode = rootNode;
         this.#id = id;
@@ -19,12 +16,10 @@ export default class FreeDOMCore{
         this.#nodeTree = utils.vDOM.parseNode(rootNode) as vElement; //rootNode不可能是文本节点，new做过判断了
 /**/}
 //////API
-/**/m(){
+/**/m(parentNode :vDOM, target :vDOM) :void{
 
     }
     mount(){}
-    r(){}
-    render(){}
     um(){
 
     }
@@ -33,6 +28,10 @@ export default class FreeDOMCore{
 
     }
     sync(){}
+    r(){
+
+    }
+    render(){}
     rs(){
 
     }

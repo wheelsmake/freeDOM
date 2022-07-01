@@ -166,95 +166,55 @@ freeDOM.rootNode("rootNodeID").getRootNode() :Element; //"#rootNodeID"
 
 无论在任何地方，以双下划线 `__` 作为开头和结尾的方法都不应调用。调用它们造成的问题均不作讨论或修复。
 
+# 概念
+
+虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。有两种 vDOM，一种在程序中叫 `vElement`，是元素节点，另一种叫 `vText`，是文本节点。
+
+vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `children`。
+
+# `freeDOM` 内 API
+
+## `createNode()`（`h()`）
+
+从参数创建 vDOM。
+
+
+
+## `parseNode()`（`p()`）
+
+将 DOM 转换为 vDOM。
+
+
+
+## `buildNode()`（`b()`）
+
+将 vDOM 转换为 DOM。
+
+
+
+# 作用域内 API
+
+## `sync()`（`s()`）
+
+将 vDOM 树同步至 DOM 树。没错，**需要开发者主动同步**，freeDOM 不会自动同步，目的是让开发者自己决定最终渲染的时机，以达到最佳性能，避免重复渲染。当然你也可以直接写 `requestAnimationFrame()` 来调用这个东西。
+
+freeDOM 不使用传统的 `diff` 算法来
+
+## `rsync()`（`rs()`）
+
+将真实 DOM 树同步至 vDOM 树，通常用于处理用户输入。
+
+
+
 # vDOM API
 
-## 概念
-
-虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。
-
-```typescript
-interface nodeDescription{
-	//已过时
-}
-```
-
-| 属性 | 描述 |
-| :--: | :--: |
-
-vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `childNodes`。
-
-vDOM 字典（`nodeStore`）：freeDOM 中 vDOM 树不只是以树的形式存储，还将作用域下所有 vDOM（因为是对象所以两边都是引用，值并不会复制）放到一个对象中，其键名即为随机生成的唯一标识符 `fID`，用于快速遍历 vDOM 树。
-
-- 根节点的 `fID` 永远是 `"rootNode"`。 
-
-## API 速览
-
-- `freeDOM` 内 API
-
-  - `createNode()`（`h()`）：从参数创建 vDOM。
-
-
-  - `difu()`（`d()`）：比较两个 vDOM 树间的区别，并生成将第一个 vDOM 树变成第二个 vDOM 树的 `转换代码`。
-
-    - > 请忽视这个方法的全称。
-
-
-  - `parseNode()`（`p()`）：将 DOM 转换为 vDOM。
-
-
-  - `buildNode()`（`b()`）：将 vDOM 转换为（游离的）DOM。
-
-- 作用域内 API
-
-  - `mount()`（`m()`、`render()`、`r()`）：将 vDOM 挂载到 vDOM（子）树上。
-  - `unmount()`（`um()`）：将 vDOM 子树从 vDOM（子）树上取下。
-  - `sync()`（`s()`）：将 vDOM（子）树同步至 DOM（子）树。没错，**需要开发者主动同步**，freeDOM 不会自动同步，目的是让开发者自己决定最终渲染的时机，以达到最佳性能，避免重复渲染。当然你也可以直接写 `requestAnimationFrame()` 来调用这个东西。
-
-  - `rsync()`（`rs()`）：将真实 DOM（子）树同步至 vDOM（子）树，通常用于处理用户输入。
-
-## `createNode()`
+## `adopt()`
 
 
 
-```typescript
-freeDOM.h(
-```
-
-| 属性 | 描述 |
-| :--: | :--: |
-
-## `difu()`
+## `parent()`
 
 
-
-```typescript
-freeDOM.d(
-```
-
-| 属性 | 描述 |
-| :--: | :--: |
-
-## `parseNode()`
-
-
-
-```typescript
-freeDOM.p(
-```
-
-| 属性 | 描述 |
-| :--: | :--: |
-
-## `buildNode()`
-
-
-
-```typescript
-freeDOM.b(
-```
-
-| 属性 | 描述 |
-| :--: | :--: |
 
 # 工具方法
 

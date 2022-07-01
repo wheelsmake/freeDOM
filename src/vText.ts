@@ -7,20 +7,33 @@ import vElement from "./vElement";
 export default class vText{
     #textContent :string;
     #instance? :Text;
-    //#fID :string;
-    constructor(textContent :string, instance? :Text){
+    #parent? :vElement;
+    #changed :vTChangeRecord = {};
+    constructor(textContent :string, instance? :Text, parent? :vElement){
+        if(typeof textContent != "string") utils.generic.EE("?"); //绝不可能走到这里
         this.#textContent = textContent;
-        if(instance){
-            this.#instance = instance;
-        }
-        //this.#fID = utils.generic.randoma2Z(10); //144,555,105,949,057,024了，不会撞上吧？
+        if(instance) this.#instance = instance;
+        if(parent) this.#parent = parent;
 /**/}
 //////CRUD
-/**/getInfo() :{textContent: string; instance: Text | undefined;}{
+/**/getInfo() :{textContent: string; instance?: Text; parent? :vElement;}{
         return{
             textContent: this.#textContent,
-            instance: this.#instance
+            instance: this.#instance,
+            parent: this.#parent
         }
+/**/}
+//////API
+/**/adopt(){
+
     }
-    //__getParent__() :string | undefined{return this.#parentID;}
+    abandon(){
+        
+    }
+    parent(){
+
+    }
+    separate(){
+
+    }
 }

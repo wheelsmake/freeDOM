@@ -30,11 +30,11 @@ export function constantize(obj :anyObject) :void{
     Object.freeze(obj);
     for(let i = 0; i < Object.keys(obj).length; i++) if(typeof obj[Object.keys(obj)[i]] == "object") constantize(obj[Object.keys(obj)[i]]);
 }
-export function E(argument? :string, type? :string, value? :any) :never{
+export function E(argument :string, type? :string, value? :any, reason? :string) :never{
     if(argument === undefined) throw new Error("An error occured.");
     else{
-        console.error(argument, type, value); //为了拿到真正的value，其他类型toString后啥信息都没了
-        throw new Error(`Argument '${argument}' ${type ? `should be a(an) ${type}` : "is invalid"}${value ? `, got ${value}` : ""}.`);
+        console.error(argument, type, value, reason); //为了拿到真正的value，其他类型toString后啥信息都没了
+        throw new Error(`Argument '${argument}' ${type ? `should be a(an) ${type}` : "is invalid"}${reason ? `, reason: ${reason}` : ""}${value ? `, got ${value}` : ""}.`);
     }
 }
 export function EE(message :any) :never{throw new Error(message);}

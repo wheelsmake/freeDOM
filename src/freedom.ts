@@ -16,26 +16,27 @@ class FreeDOM{
 /**/new(args :scopeManageArgs) :FreeDOMCore | null{
         utils.misc.checkSMArgsnReduce(args);
         args.rootNode = args.rootNode as Element; //hack:ts真无聊
-        //排除已经是目前作用域或目前作用域子元素的新增
         if(!utils.element.isInDocument(args.rootNode)){
+            utils.generic.E("rootNode", "Element | string", args.rootNode, "rootNode is not appended to Document yet.");
             console.warn(args.rootNode, " is not in document.");
             return null;
         }
+        //排除已经是目前作用域或目前作用域子元素的新增
         for(let i = 0; i < this.#instances.length; i++){
             if(utils.element.isDescendant(args.rootNode, this.#instances[i].getRootNode()) || args.rootNode === this.#instances[i].getRootNode()){
-                console.warn(args.rootNode, " is already a descendant of a rootNode of an exist scope, thus freeDOM won't add it.");
+                utils.generic.E("rootNode", "Element | string", args.rootNode, "it's a descendant of an exist rootNode, thus freeDOM won't add it. See README.md#%E6%96%B0%E5%A2%9E.");
                 return null;
             }
             else if(args.id === this.#instances[i].getID()){
-                console.error(args.id, "is duplicated.");
+                utils.generic.E("id", "unique string", args.id, "id can't be duplicated");
                 return null;
             }
             else if(args.rootNode === this.#instances[i].getRootNode()){
-                console.error(args.rootNode, "is duplicated.");
+                utils.generic.E("rootNode", "Element | string", args.rootNode, "rootNode can't be duplicated");
                 return null;
             }
         }
-        //note:不能随便删除作用域实例！！！！！
+        //note:不能随便删除作用域实例！！！
         const instance = new FreeDOMCore(args.rootNode, args.id);
         this.#instances.push(instance);
         return instance;
@@ -78,20 +79,17 @@ class FreeDOM{
         for(let i = 0; i < this.#instances.length; i++) if(this.#instances[i].getRootNode() === trueRootNode) return this.#instances[i];
         return null;
 /**/}
-//////工具方法
-/**/h(tagName :string, attributes :nNullkvObject, children :vDOM_A) :vElement{return utils.vDOM.createVElementFromData(tagName, attributes, children);}
-    createNode(tagName :string, attributes :nNullkvObject, children :vDOM_A) :vElement{return utils.vDOM.createVElementFromData(tagName, attributes, children);}
+//////API
+/**/h(tagName :string, attr :nNullkvObject, children :vDOM_A) :vElement{return utils.vDOM.createVElementFromData(tagName, attr, children);}
+    createNode(tagName :string, attr :nNullkvObject, children :vDOM_A) :vElement{return utils.vDOM.createVElementFromData(tagName, attr, children);}
     p(node :Node) :vDOM{return utils.vDOM.parseNode(node)!;}
     parseNode(node :Node) :vDOM{return utils.vDOM.parseNode(node)!;}
     b(sda :anyObject){
         
     }
-    buildNode(){}
-    d(){
-
-    }
-    difu(){}
-    e(s :string, scope? :Element | Document) :Node | Node[]{return utils.element.e(s, scope);}
+/**/buildNode(){}
+//////工具方法
+/**/e(s :string, scope? :Element | Document) :Node | Node[]{return utils.element.e(s, scope);}
 }
 utils.generic.constantize(FreeDOM);
-(window as any).FreeDOM = FreeDOM;
+(window as anyObject).FreeDOM = FreeDOM;
