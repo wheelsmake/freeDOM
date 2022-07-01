@@ -15,6 +15,7 @@ export default class FreeDOMCore{
     constructor(rootNode :Element, id :string){
         this.#rootNode = rootNode;
         this.#id = id;
+        //生成根节点vDOM树
         this.#nodeTree = utils.vDOM.parseNode(rootNode) as vElement; //rootNode不可能是文本节点，new做过判断了
 /**/}
 //////API
