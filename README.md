@@ -3,196 +3,95 @@
 
 ## 没有的功能
 
-1. 不支持 shadow DOM。在含有 shadow DOM 的页面上会出现未知错误。
+1. 不支持 shadow DOM。在含有 shadow DOM 的页面上会出现未知错误。//todo
+
+# 定义
+
+虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。有两种 vDOM，一种在程序中叫 `vElement`，是元素节点，另一种叫 `vText`，是文本节点。
+
+```typescript
+interface vElement{
+    id :string | null;
+    tagName :string;
+    attrs :Record<string, string>;
+    children :(string | vElement)[];
+    instance :Element | null;
+}
+```
+
+vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `children`。
+
+```typescript
+//代码中实际上不存在nodeTree类型，因为vDOM树的根节点类型还是vElement
+type nodeTree = vElement;
+```
 
 # 开始使用
 
 实例化。
 
 ```typescript
-const freeDOM = new FreeDOM();
+const freeDOM = new FreeDOM(rootNode :Element | string, options? :fdOptions) :FreeDOM;
 ```
 
-后文默认使用 `freeDOM` 进行交互。一般来说一个页面只需创建一个实例即可。
-
-# 作用域
-
-freeDOM 会监测的 DOM 子树被称为 `作用域`。每一个 DOM 子树都对应了一个作用域实例。
-
-## 新增
+|    属性    |               描述                |
+| :--------: | :-------------------------------: |
+| `rootNode` | 根节点，该实例在 DOM 树中的作用域 |
+| `options`  |             配置参数              |
 
 ```typescript
-freeDOM.new({
-    id :string,
-    rootNode :Element | string
-}) :FreeDOMCore | null;
+interface fdOptions{
+
+}
 ```
 
-|    参数    |                            描述                             |
-| :--------: | :---------------------------------------------------------: |
-| `rootNode` | 作用域的根节点或根节点的 `id` 属性（以 `#element-id` 形式） |
-|    `id`    |                        作用域的 `id`                        |
+后文默认使用名为 `freeDOM` 的实例。
 
-如果创建成功，则返回实例，否则返回 `null`。创建失败的情况通常可能是：新作用域是某一已注册作用域或某一已注册作用域的子作用域；传入了未挂载到页面中的节点（为了防止误操作而限制）；传入的 `id` 不是唯一的。
+# 特性
 
-- FreeDOM 不建议在已有的作用域的子树上创建新的作用域，因此会拒绝子树作用域的创建。如果确有需求，可以考虑先创建子树上的作用域，再创建父树上的作用域。
-- 作用域的 `id` 和根节点都是该 freeDOM 实例内唯一的。
+1. freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s+/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。虽然 freeDOM 在处理上已经比较智能，但如果确实有这样的排版需求，请在 [`options`](#开始使用) 中添加 `ignoreNLIText` 选项为 `true`。
 
-- 作用域被创建时，freeDOM 会自动以根节点为树根生成 vDOM 树。
-
-## 按 `id` 查询
-
-```typescript
-freeDOM.existsID(id :string) :Element | null;
-```
-
-| 参数 |     描述      |
-| :--: | :-----------: |
-| `id` | 作用域的 `id` |
-
-如存在相应 `id` 则返回作用域根节点，不存在则返回 `null`。
-
-## 按根节点查询
-
-```typescript
-freeDOM.existsNode(rootNode :Element | string) :string | null;
-```
-
-|    参数    |                            描述                             |
-| :--------: | :---------------------------------------------------------: |
-| `rootNode` | 作用域的根节点或根节点的 `id` 属性（以 `#element-id` 形式） |
-
-如存在相应根节点则返回作用域 `id`，不存在则返回 `null`。
-
-## 按 `id` 更新根节点
-
-```typescript
-freeDOM.updateByID({
-    id :string,
-    rootNode :Element | string
-}) :Element | null;
-```
-
-|    参数    |                             描述                             |
-| :--------: | :----------------------------------------------------------: |
-|    `id`    |                        作用域的 `id`                         |
-| `rootNode` | 作用域的新根节点或新根节点的 `id` 属性（以 `#element-id` 形式） |
-
-如存在相应 `id` 则更新并返回旧的根节点，不存在则返回 `null`。
-
-## 按根节点更新 `id`
-
-```typescript
-freeDOM.updateByNode({
-    id :string,
-    rootNode :Element | string
-}) :string | null;
-```
-
-|    参数    |                            描述                             |
-| :--------: | :---------------------------------------------------------: |
-|    `id`    |                       作用域的新 `id`                       |
-| `rootNode` | 作用域的根节点或根节点的 `id` 属性（以 `#element-id` 形式） |
-
-如存在相应根节点则更新并返回旧的 `id`，不存在则返回 `null`。
-
-## 删除
-
-```typescript
-freeDOM.delete(arg :string | Element) :{id :string, rootNode :Element} | null;
-```
-
-| 参数  |          描述          |
-| :---: | :--------------------: |
-| `arg` | 作用域的 `id` 或根节点 |
-
-如存在相应 `id` 或根节点则删除作用域并返回作用域对象，不存在则返回 `null`。
-
-因为根节点的 `id` 属性和 `id` 都是字符串，会造成歧义，所以不允许传入根节点的 `id` 属性。
-
-- 删除作用域操作不可逆。所有相关数据都将被删除。请谨慎进行删除操作。
-
-## 获取作用域
-
-每个作用域维护一份专有的 vDOM，所以调用作用域 API 前要获取作用域实例。
-
-作用域实例在 `new()` 时可以获得，也可以通过下面的方式获得。
-
-- 通过 `id` 获取：
-
-```typescript
-freeDOM.id(id :string) :FreeDOMCore | null;
-```
-
-| 参数 |     描述      |
-| :--: | :-----------: |
-| `id` | 作用域的 `id` |
-
-- 通过 `rootNode` 获取：
-
-```typescript
-freeDOM.rootNode(rootNode :Element | string) :FreeDOMCore | null;
-```
-
-|    参数    |                           描述                            |
-| :--------: | :-------------------------------------------------------: |
-| `rootNode` | 作用域的根节点根节点的 `id` 属性（以 `#element-id` 形式） |
-
-如果不存在相应作用域则返回 `null`。
-
-- `FreeDOMCore` 是作用域的类名。
-
-## 获取作用域信息
-
-获取作用域的 ID：
-
-```typescript
-freeDOM.id("id").getID() :string; //"id"
-```
-
-> 听君一席话，如听一席话。
-
-获取作用域的 rootNode：
-
-```typescript
-freeDOM.rootNode("rootNodeID").getRootNode() :Element; //"#rootNodeID"
-```
-
-> 还是听君一席话，如听一席话。
-
-不过交换着用就有意义了。
-
-# 不应使用的 API
-
-无论在任何地方，以双下划线 `__` 作为开头和结尾的方法都不应调用。调用它们造成的问题均不作讨论或修复。
-
-# 概念
-
-虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。有两种 vDOM，一种在程序中叫 `vElement`，是元素节点，另一种叫 `vText`，是文本节点。
-
-vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `children`。
-
-# `freeDOM` 内 API
+# API
 
 ## `createNode()`（`h()`）
 
 从参数创建 vDOM。
 
+```typescript
+freeDOM.h(tagName :string, attr? :Record<string, string> | null, children? :(string | vElement)[]) :vElement;
+```
 
+|    属性    |    描述    |
+| :--------: | :--------: |
+| `tagName`  |   标签名   |
+|   `attr`   | 属性和事件 |
+| `children` | 子节点数组 |
+
+为了合乎 JSX 编译的标准，在不需要传入 `attr` 参数时可以使用 `null` 占位；并且 `children` 参数是可选的。
 
 ## `parseNode()`（`p()`）
 
 将 DOM 转换为 vDOM。
 
+```typescript
+freeDOM.p(node :Node) :vElement | string | null;
+```
 
+|  属性  | 描述 |
+| :----: | :--: |
+| `node` | 节点 |
+
+如果传入的节点是文本节点，那么该方法会返回其文本内容或 `null`（当文本节点完全是换行缩进时）。
 
 ## `buildNode()`（`b()`）
 
 将 vDOM 转换为 DOM。
 
+```typescript
+freeDOM.b(vElement :vElement | string) :instance;
+```
 
 
-# 作用域内 API
 
 ## `sync()`（`s()`）
 
@@ -203,16 +102,6 @@ freeDOM 不使用传统的 `diff` 算法来
 ## `rsync()`（`rs()`）
 
 将真实 DOM 树同步至 vDOM 树，通常用于处理用户输入。
-
-
-
-# vDOM API
-
-## `adopt()`
-
-
-
-## `parent()`
 
 
 
@@ -233,16 +122,30 @@ freeDOM.e(s :string, scope? :Element | Document) :Node | Node[];
 
 仅当传入选择器的最终选择器为 ID 选择器（即 `#` ）且获取到元素时返回 `Node` 类型单个元素，否则返回  `Node[]` 类型。
 
+# vDOM API
+
+## `adopt()`
+
+
+
+## `parent()`
+
+
+
+# 不应使用的 API
+
+无论在任何地方，以双下划线 `__` 作为开头和结尾的方法都不应调用。调用它们造成的问题均不作讨论或修复。
+
 # 其他
 
 ## 为 freeDOM 的开发搭建开发环境
 
 ```shell
-npm install -D typescript webpack webpack-cli terser-webpack-plugin
+npm install -D typescript ts-loader webpack webpack-cli terser-webpack-plugin
 ```
 
 ```shell
-npm install -S ts-loader
+tsc -init
 ```
 
 ## 搭建基于 freeDOM 的开发环境

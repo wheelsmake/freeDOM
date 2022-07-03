@@ -6,9 +6,23 @@
         <title>freeDOM test</title>
     </head>
     <body>
+<te_:-st>
+<div>aaaaaaaaaa</div>
+<div>bbbbbbbbbbbbbb</div>
+<div>ccccccccccc</div>
+</te_:-st>
+<textarea>
+    dwqa
+    dw
+    wqef
+    effreeDOMef                                                   few
+    efg
+ef
+gfeefwsef
+</textarea>
         <div id="app">
             缩进的文本节点。
-            <section aria-labelledby="方法">
+            <section id="event-test" aria-labelledby="方法" onclick="a = 'a'" ondblclick="asd(this)">
                 <h2 id="方法"><a href="#方法" title="Permalink to 方法">方法</a></h2>
                 <div class="section-content">
                     <p><em>该接口没有继承任何方法。</em></p>
@@ -52,6 +66,16 @@
                     </dl>
                 </div>
             </section>
+            <h1>Event</h1>
+            <div class="section-content">
+                <div id="sect1"></div>
+                <p><strong><code>Event</code></strong> 接口表示在 DOM 中出现的事件。</p>
+                <p>一些事件是由用户触发的，例如鼠标或键盘事件；而其他事件常由 API 生成，例如指示动画已经完成运行的事件，视频已被暂停等等。事件也可以通过脚本代码触发，例如对元素调用 <code><a href="/en-US/docs/Web/API/HTMLElement/click">HTMLElement.click()</a></code> 方法，或者定义一些自定义事件，再使用 <code><a href="/en-US/docs/Web/API/EventTarget/dispatchEvent">EventTarget.dispatchEvent()</a></code> 方法将自定义事件派发往指定的目标（target）。</p>
+                <p>有许多不同类型的事件，其中一些使用基于 <code>Event</code> 主接口的二次接口。<code>Event</code> 本身包含适用于所有事件的属性和方法。</p>
+                <p>很多 DOM 元素可以被设计接收 (或者监听) 这些事件，并且执行代码去响应（或者处理）它们。通过<code><a href="/en-US/docs/Web/API/EventTarget/addEventListener">EventTarget.addEventListener()</a></code>方法可以将事件处理函数绑定到不同的<a href="/en-US/docs/Web/HTML/Element">HTML elements</a>上 (比如<code>&lt;button&gt;</code>, <code>&lt;div&gt;</code>, <code>&lt;span&gt;</code>等等) 。这种绑定事件处理函数的方式基本替换了老版本中使用 HTML <a href="/en-US/docs/Web/HTML/Global_attributes">event handler attributes</a>来绑定事件处理函数的方式。除此之外，通过正确使用<a href="/en-US/docs/Web/API/EventTarget/removeEventListener"><code>removeEventListener()</code></a>方法，这些事件处理函数也能被移除。</p>
+                <div class="note notecard" id="sect2">
+                        <p><strong>Note:</strong>&nbsp;一个元素可以绑定多个事件处理函数，甚至是同一种类型的事件。尤其是这种分离的，并且相互独立的代码模块对同一个元素绑定事件处理函数，每一个模块代码都有着独立的目的。（比如，一个网页同时有着广告模块和统计模块同时监听视频播放元素）</p>
+                </div>
         </div>
     </body>
     <script src="../dist/freedom.js"></script>
