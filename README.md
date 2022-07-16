@@ -7,14 +7,14 @@
 
 # 定义
 
-虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元。有两种 vDOM，一种在程序中叫 `vElement`，是元素节点，另一种叫 `vText`，是文本节点。
+虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元，在程序中叫 `vElement`。
 
 ```typescript
 interface vElement{
     id :string | null;
     tagName :string;
-    attrs :Record<string, string>;
-    children :(string | vElement)[];
+    attrs :Record<string, string> | null;
+    children :(string | vElement)[] | null;
     instance :Element | null;
 }
 ```
@@ -41,7 +41,7 @@ const freeDOM = new FreeDOM(rootNode :Element | string, options? :fdOptions) :Fr
 
 ```typescript
 interface fdOptions{
-
+	ignoreNLIText :boolean;
 }
 ```
 
@@ -53,12 +53,12 @@ interface fdOptions{
 
 # API
 
-## `createNode()`（`h()`）
+## `createNode()`（`c()`）
 
 从参数创建 vDOM。
 
 ```typescript
-freeDOM.h(tagName :string, attr? :Record<string, string> | null, children? :(string | vElement)[]) :vElement;
+freeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(string | vElement)[]) :vElement;
 ```
 
 |    属性    |    描述    |
@@ -66,6 +66,8 @@ freeDOM.h(tagName :string, attr? :Record<string, string> | null, children? :(str
 | `tagName`  |   标签名   |
 |   `attr`   | 属性和事件 |
 | `children` | 子节点数组 |
+
+为了兼容，这个玩意也同时叫做 `createElement()`、`createVElement()`、`h()`、`createVNode()`、`createNodeDescription()`。
 
 为了合乎 JSX 编译的标准，在不需要传入 `attr` 参数时可以使用 `null` 占位；并且 `children` 参数是可选的。
 
@@ -77,9 +79,9 @@ freeDOM.h(tagName :string, attr? :Record<string, string> | null, children? :(str
 freeDOM.p(node :Node) :vElement | string | null;
 ```
 
-|  属性  | 描述 |
-| :----: | :--: |
-| `node` | 节点 |
+|  属性  |   描述   |
+| :----: | :------: |
+| `node` | DOM 节点 |
 
 如果传入的节点是文本节点，那么该方法会返回其文本内容或 `null`（当文本节点完全是换行缩进时）。
 
@@ -91,15 +93,17 @@ freeDOM.p(node :Node) :vElement | string | null;
 freeDOM.b(vElement :vElement | string) :instance;
 ```
 
+|    属性    | 描述 |
+| :--------: | :--: |
+| `vElement` | vDOM |
 
+如果传入的不是 vDOM，将会引发错误。
 
 ## `sync()`（`s()`）
 
 将 vDOM 树同步至 DOM 树。没错，**需要开发者主动同步**，freeDOM 不会自动同步，目的是让开发者自己决定最终渲染的时机，以达到最佳性能，避免重复渲染。当然你也可以直接写 `requestAnimationFrame()` 来调用这个东西。
 
-freeDOM 不使用传统的 `diff` 算法来
-
-## `rsync()`（`rs()`）
+## `rsync()`（`r()`）
 
 将真实 DOM 树同步至 vDOM 树，通常用于处理用户输入。
 

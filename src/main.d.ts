@@ -16,7 +16,7 @@ type childrenArray = (string | vElement)[];
 
 /**参数类型*/
 interface fdOptions{
-
+	ignoreNLIText :boolean;
 }
 
 /**定义类型*/

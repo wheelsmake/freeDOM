@@ -7,18 +7,42 @@ import * as localUtils from "./utils/index";
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
 class FreeDOM{
     #rootNode :Element;
+    #vDOMTree? :vElement; //hack:ts真无聊
+    #options? :fdOptions;
     constructor(rootNode :Elementy, options? :fdOptions){
-        this.#rootNode = localUtils.misc.reduceToElement(rootNode);
-        console.info("creating new FreeDOM instance with rootNode", rootNode);
+        console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
+        rootNode = localUtils.misc.reduceToElement(rootNode);
+        this.#rootNode = rootNode;
+        const tree = localUtils.vDOM.parseNode(rootNode);
+        if(typeof tree == "string" || tree === null) utils.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
+        else this.#vDOMTree = tree;
+        this.#options = options;
 /**/}
 //////API
 /**///utils那边都做了检测了，这边只管调用
-    h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
+    //创建vDOM
+    c(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs, children);
     }
     createNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs, children);
     }
+    createElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
+        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    }
+    createVElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
+        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    }
+    h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
+        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    }
+    createVNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
+        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    }
+    createNodeDescription(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
+        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    }r
+    //结束 创建vDOM
     p(node :Node) :vElement | string | null{
         return localUtils.vDOM.parseNode(node);
     }
@@ -30,6 +54,18 @@ class FreeDOM{
     }
     buildNode(vElement :vElement | string) :instance{
         return localUtils.vDOM.buildNode(vElement);
+    }
+    s(){
+
+    }
+    sync(){
+
+    }
+    r(){
+
+    }
+    rsync(){
+        
     }
     __extractAttr__(element :Element) :SSkvObject | null{
         return localUtils.vDOM.extractAttr(element);

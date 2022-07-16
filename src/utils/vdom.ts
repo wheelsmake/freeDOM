@@ -69,7 +69,8 @@ export function extractAttr(element :Element) :SSkvObject | null{
     /* note:
      * 不能获取元素通过addEventListener绑定的事件
      * 元素的on*属性是不准确的，表现在每次on*属性更改时浏览器都会重新注册一次事件，就算和之前某次一样都会重复注册
-     * 
+     * 所以没法提取事件，必须在 freeDOM 内注册事件
+     * 或者有一个折中方案：传入元素时附带传入事件
      */
     if(Object.keys(result).length === 0) return null;
     else return result;
