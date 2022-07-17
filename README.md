@@ -51,6 +51,18 @@ interface fdOptions{
 
 1. freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s+/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。虽然 freeDOM 在处理上已经比较智能，但如果确实有这样的排版需求，请在 [`options`](#开始使用) 中添加 `ignoreNLIText` 选项为 `true`。
 
+2. freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加载的 JavaScript 暴露元素的事件信息，freeDOM 无法获取元素已设置的事件。因此 freeDOM 使用了修改 `Element.prototype.addEventListener()` 的方法来达到监控元素的时间设置。所以，**请务必只使用 `element.addEvenetListener()` 为元素添加事件**，并且添加事件的时机必须在其 freeDOM 实例创建**后**。如果仍要使用原先的方法（强烈不建议），可使用 `Element.oddEventListener()`。
+
+   ```html
+   <script src="freedom.js"></script><!--建议在<head>元素中导入freedom-->
+   <script>
+       var freeDOM = new FreeDOM("#el");
+       el.addEventListener( //一个Proxy对象
+           ...
+       );
+   </script>
+   ```
+
 # API
 
 ## `createNode()`（`c()`）

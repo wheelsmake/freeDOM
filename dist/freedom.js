@@ -453,20 +453,53 @@ var __classPrivateFieldSet = (undefined && undefined.__classPrivateFieldSet) || 
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var _FreeDOM_rootNode;
+var _FreeDOM_rootNode, _FreeDOM_vDOMTree, _FreeDOM_options;
 
 
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
+var instances = [];
+const Ep = Element.prototype;
+Ep.oddEventListener = Ep.addEventListener;
+Ep.addEventListener = new Proxy(Ep.oddEventListener, {
+    apply(oEL, callerElement, argArray) {
+        return Reflect.apply(oEL, callerElement, argArray);
+    }
+});
 class FreeDOM {
     constructor(rootNode, options) {
         _FreeDOM_rootNode.set(this, void 0);
-        __classPrivateFieldSet(this, _FreeDOM_rootNode, _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode), "f");
-        console.info("creating new FreeDOM instance with rootNode", rootNode);
+        _FreeDOM_vDOMTree.set(this, void 0);
+        _FreeDOM_options.set(this, void 0);
+        console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
+        rootNode = _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode);
+        __classPrivateFieldSet(this, _FreeDOM_rootNode, rootNode, "f");
+        const tree = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(rootNode);
+        if (typeof tree == "string" || tree === null)
+            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
+        else
+            __classPrivateFieldSet(this, _FreeDOM_vDOMTree, tree, "f");
+        __classPrivateFieldSet(this, _FreeDOM_options, options, "f");
+        instances.push(this);
+    }
+    c(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    }
+    createNode(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    }
+    createElement(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    }
+    createVElement(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
     }
     h(tagName, attrs, children) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
     }
-    createNode(tagName, attrs, children) {
+    createVNode(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    }
+    createNodeDescription(tagName, attrs, children) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
     }
     p(node) {
@@ -481,12 +514,20 @@ class FreeDOM {
     buildNode(vElement) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
     }
+    s() {
+    }
+    sync() {
+    }
+    r() {
+    }
+    rsync() {
+    }
     __extractAttr__(element) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.extractAttr(element);
     }
     e(s, scope) { return _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(s, scope); }
 }
-_FreeDOM_rootNode = new WeakMap();
+_FreeDOM_rootNode = new WeakMap(), _FreeDOM_vDOMTree = new WeakMap(), _FreeDOM_options = new WeakMap();
 _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.constantize(FreeDOM);
 window.FreeDOM = FreeDOM;
 

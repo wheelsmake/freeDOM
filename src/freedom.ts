@@ -5,6 +5,15 @@
 import * as utils from "../../utils/index";
 import * as localUtils from "./utils/index";
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
+var instances :FreeDOM[] = [];
+const Ep = Element.prototype;
+(Ep as anyObject).oddEventListener = Ep.addEventListener;
+Ep.addEventListener = new Proxy((Ep as anyObject).oddEventListener, {
+    apply(oEL :Function, callerElement :Element, argArray :[]){
+        //todo:获取事件
+        return Reflect.apply(oEL, callerElement, argArray);
+    }
+});
 class FreeDOM{
     #rootNode :Element;
     #vDOMTree? :vElement; //hack:ts真无聊
@@ -17,6 +26,7 @@ class FreeDOM{
         if(typeof tree == "string" || tree === null) utils.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
         else this.#vDOMTree = tree;
         this.#options = options;
+        instances.push(this); //记录实例
 /**/}
 //////API
 /**///utils那边都做了检测了，这边只管调用
@@ -41,7 +51,7 @@ class FreeDOM{
     }
     createNodeDescription(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs, children);
-    }r
+    }
     //结束 创建vDOM
     p(node :Node) :vElement | string | null{
         return localUtils.vDOM.parseNode(node);
