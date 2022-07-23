@@ -85,4 +85,9 @@ class FreeDOM{
 /**/e(s :string, scope? :Element | Document) :Node | Node[]{return utils.element.e(s, scope);}
 }
 utils.generic.constantize(FreeDOM);
-(window as anyObject).FreeDOM = FreeDOM;
+Object.defineProperty(window, "FreeDOM", {
+    configurable: false,
+    writable: false,
+    enumerable: true,
+    value: FreeDOM
+});

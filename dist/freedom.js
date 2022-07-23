@@ -529,7 +529,12 @@ class FreeDOM {
 }
 _FreeDOM_rootNode = new WeakMap(), _FreeDOM_vDOMTree = new WeakMap(), _FreeDOM_options = new WeakMap();
 _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.constantize(FreeDOM);
-window.FreeDOM = FreeDOM;
+Object.defineProperty(window, "FreeDOM", {
+    configurable: false,
+    writable: false,
+    enumerable: true,
+    value: FreeDOM
+});
 
 })();
 
