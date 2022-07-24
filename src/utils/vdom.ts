@@ -4,6 +4,8 @@
 */
 import * as utils from "../../../utils/index";
 import * as localUtils from "./index";
+//这个东西不能导出，否则ts会无法编译
+import * as FreeDOM from "../freedom";
 function testNodeType(node :Node) :"Text" | "Element" | false{
     if(node instanceof Text) return "Text";
     else if(node instanceof Element) return "Element";
@@ -21,18 +23,22 @@ function isVElement(input :any) :boolean{
 }
 function processNLIText(textNode :Text) :string | null{
     const textContent = textNode.textContent!,
-          pContent = textContent.replace(/\n\s+/g, " "), //插入空格，保持视觉效果
+          //这个是用来标记原字符串是否需要处理的
+          signContent = textContent.replace(/\n\s*/g, ""), //只有\n也要删
           parent = textNode.parentElement as Element; //replace不改动原字符串
     const shouldKeepNLI = parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable); //排除可编辑内容的元素的内容
-    if(!shouldKeepNLI && pContent === ""){ //完全就是垃圾节点
-        textNode.remove();
-        return null;
+    if(shouldKeepNLI) return textContent;
+    else{
+        if(signContent === ""){ //完全就是垃圾节点
+            textNode.remove();
+            return null;
+        }
+        else if(signContent !== textContent){ //部分垃圾
+            textNode.textContent = textContent.replace(/\n\s*/g, " "); //更新文本节点，插入空格，保持视觉效果
+            return signContent;
+        }
+        else return textContent; //没有垃圾
     }
-    else if(!shouldKeepNLI && pContent !== textContent){ //部分垃圾
-        textNode.textContent = pContent; //更新文本节点
-        return pContent;
-    }
-    else return textContent;
 }
 export function createVElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray, instance? :Element) :vElement{
     return{
@@ -56,17 +62,22 @@ export function parseNode(node :Node) :vElement | string | null{
         return ""; //hack:ts真无聊
     }
 }
-/****临时导出方法**
- * 测试完成后请及时取消导出
-*/
-export function extractAttr(element :Element) :SSkvObject | null{
+function extractAttr(element :Element) :anyObject | null{
     const test = testNodeType(element);
     if(test == "Text" || test === false) utils.generic.E("element", "Element", element, "only Element have attributes"); //文本节点不存在attr
     const attr = element.attributes; //typeof NamedNodeMap
-    var result :SSkvObject = {};
-    for(let i = 0; i < attr.length; i++) result[attr[i].name] = attr[i].textContent!;
-    //fixed:已经通过修改addEventListener完成
-    //不能获取元素通过addEventListener绑定的事件
+    var result :anyObject = {};
+    for(let i = 0; i < attr.length; i++) result[attr[i].name] = attr[i].textContent!; //只要传入已有name就不会出null
+    /* fixed:已经通过修改addEventListener完成
+     * 不能获取元素通过addEventListener绑定的事件
+    */
+    //从eventStore里弄事件
+    if(FreeDOM.eventStore.has(element)){
+        const events = FreeDOM.eventStore.get(element)!;
+        for(let i = 0; i< Object.keys(events).length; i++){
+
+        }
+    }
     if(Object.keys(result).length === 0) return null;
     else return result;
 }

@@ -2,6 +2,195 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/freedom.ts":
+/*!************************!*\
+  !*** ./src/freedom.ts ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "eventStore": () => (/* binding */ eventStore),
+/* harmony export */   "instances": () => (/* binding */ instances)
+/* harmony export */ });
+/* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/index */ "../utils/index.ts");
+/* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/index */ "./src/utils/index.ts");
+var __classPrivateFieldSet = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _FreeDOMCore_rootNode, _FreeDOMCore_options, _FreeDOMCore_vDOM;
+
+
+console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
+const instances = [], eventStore = new Map();
+
+const Ep = Element.prototype, Ep_A = Ep;
+Ep_A.oddEventListener = Ep.addEventListener;
+Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
+    apply(oEL, callerElement, argArray) {
+        console.log(callerElement, argArray);
+        const [eventName, handler, arg1, arg2] = argArray;
+        if (eventStore.has(callerElement)) {
+            const record = eventStore.get(callerElement);
+            if (record[eventName] === undefined)
+                record[eventName] = [{
+                        handler, arg1, arg2
+                    }];
+            else {
+                var isDuplicated = false;
+                const useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
+                console.log(useCapture);
+                for (let i = 0; i < record[eventName].length; i++) {
+                    const thisArg1 = record[eventName][i].arg1, thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false;
+                    if (handler === record[eventName][i].handler && useCapture === thisUseCapture) {
+                        isDuplicated = true;
+                        break;
+                    }
+                }
+                if (!isDuplicated)
+                    record[eventName].push({
+                        handler, arg1, arg2
+                    });
+            }
+            eventStore.set(callerElement, record);
+        }
+        else
+            eventStore.set(callerElement, {
+                [eventName]: [{
+                        handler, arg1, arg2
+                    }]
+            });
+        return Reflect.apply(oEL, callerElement, argArray);
+    }
+});
+Ep_A.oemoveEventListener = Ep.removeEventListener;
+Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
+    apply(omEL, callerElement, argArray) {
+        console.log(callerElement, argArray);
+        const [eventName, handler, arg1] = argArray;
+        if (eventStore.has(callerElement)) {
+            const record = eventStore.get(callerElement);
+            if (record[eventName] !== undefined) {
+                const useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
+                for (let i = 0; i < record[eventName].length; i++) {
+                    const thisArg1 = record[eventName][i].arg1, thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false;
+                    if (handler === record[eventName][i].handler && useCapture === thisUseCapture)
+                        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.precisePop(record[eventName][i], record[eventName]);
+                }
+            }
+            eventStore.set(callerElement, record);
+        }
+        return Reflect.apply(omEL, callerElement, argArray);
+    }
+});
+const observer = new MutationObserver(observerCB);
+observer.observe(document, {
+    subtree: true,
+    childList: true
+});
+function observerCB(mutations) {
+    console.log(mutations);
+}
+class FreeDOMCore {
+    constructor(rootNode, options) {
+        _FreeDOMCore_rootNode.set(this, void 0);
+        _FreeDOMCore_options.set(this, void 0);
+        _FreeDOMCore_vDOM.set(this, void 0);
+        console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
+        rootNode = _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode);
+        __classPrivateFieldSet(this, _FreeDOMCore_rootNode, rootNode, "f");
+        const tree = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(rootNode);
+        if (typeof tree == "string" || tree === null)
+            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
+        else
+            __classPrivateFieldSet(this, _FreeDOMCore_vDOM, tree, "f");
+        __classPrivateFieldSet(this, _FreeDOMCore_options, options, "f");
+        instances.push(this);
+    }
+    get rootNode() { return __classPrivateFieldGet(this, _FreeDOMCore_rootNode, "f"); }
+    get options() { return __classPrivateFieldGet(this, _FreeDOMCore_options, "f"); }
+    m() {
+    }
+    mount() {
+    }
+    u() {
+    }
+    unmount() {
+    }
+    s() {
+    }
+    sync() {
+    }
+    r() {
+    }
+    rsync() {
+    }
+}
+_FreeDOMCore_rootNode = new WeakMap(), _FreeDOMCore_options = new WeakMap(), _FreeDOMCore_vDOM = new WeakMap();
+const FreeDOM = {
+    new(rootNode, options) {
+        return new FreeDOMCore(rootNode, options);
+    },
+    get instances() {
+        return [...instances];
+    },
+    get eventStore() {
+        return new Map(eventStore);
+    },
+    c(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    createNode(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    createElement(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    createVElement(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    h(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    createVNode(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    createNodeDescription(tagName, attrs, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    },
+    p(node) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
+    },
+    parseNode(node) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
+    },
+    b(vElement) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
+    },
+    buildNode(vElement) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
+    },
+    e(s, scope) { return _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(s, scope); },
+};
+_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.constantize(FreeDOM);
+Object.defineProperty(window, "FreeDOM", {
+    configurable: false,
+    writable: false,
+    enumerable: true,
+    value: FreeDOM
+});
+
+
+/***/ }),
+
 /***/ "./src/utils/index.ts":
 /*!****************************!*\
   !*** ./src/utils/index.ts ***!
@@ -61,10 +250,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "buildNode": () => (/* binding */ buildNode),
 /* harmony export */   "createVElement": () => (/* binding */ createVElement),
-/* harmony export */   "extractAttr": () => (/* binding */ extractAttr),
 /* harmony export */   "parseNode": () => (/* binding */ parseNode)
 /* harmony export */ });
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/index */ "../utils/index.ts");
+/* harmony import */ var _freedom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../freedom */ "./src/freedom.ts");
+
 
 function testNodeType(node) {
     if (node instanceof Text)
@@ -83,18 +273,22 @@ function isVElement(input) {
         && "instance" in input);
 }
 function processNLIText(textNode) {
-    const textContent = textNode.textContent, pContent = textContent.replace(/\n\s+/g, " "), parent = textNode.parentElement;
+    const textContent = textNode.textContent, signContent = textContent.replace(/\n\s*/g, ""), parent = textNode.parentElement;
     const shouldKeepNLI = parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable);
-    if (!shouldKeepNLI && pContent === "") {
-        textNode.remove();
-        return null;
-    }
-    else if (!shouldKeepNLI && pContent !== textContent) {
-        textNode.textContent = pContent;
-        return pContent;
-    }
-    else
+    if (shouldKeepNLI)
         return textContent;
+    else {
+        if (signContent === "") {
+            textNode.remove();
+            return null;
+        }
+        else if (signContent !== textContent) {
+            textNode.textContent = textContent.replace(/\n\s*/g, " ");
+            return signContent;
+        }
+        else
+            return textContent;
+    }
 }
 function createVElement(tagName, attrs, children, instance) {
     return {
@@ -126,6 +320,11 @@ function extractAttr(element) {
     var result = {};
     for (let i = 0; i < attr.length; i++)
         result[attr[i].name] = attr[i].textContent;
+    if (_freedom__WEBPACK_IMPORTED_MODULE_1__.eventStore.has(element)) {
+        const events = _freedom__WEBPACK_IMPORTED_MODULE_1__.eventStore.get(element);
+        for (let i = 0; i < Object.keys(events).length; i++) {
+        }
+    }
     if (Object.keys(result).length === 0)
         return null;
     else
@@ -438,106 +637,12 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-/*!************************!*\
-  !*** ./src/freedom.ts ***!
-  \************************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/index */ "../utils/index.ts");
-/* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/index */ "./src/utils/index.ts");
-var __classPrivateFieldSet = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var _FreeDOM_rootNode, _FreeDOM_vDOMTree, _FreeDOM_options;
-
-
-console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
-var instances = [];
-const Ep = Element.prototype;
-Ep.oddEventListener = Ep.addEventListener;
-Ep.addEventListener = new Proxy(Ep.oddEventListener, {
-    apply(oEL, callerElement, argArray) {
-        return Reflect.apply(oEL, callerElement, argArray);
-    }
-});
-class FreeDOM {
-    constructor(rootNode, options) {
-        _FreeDOM_rootNode.set(this, void 0);
-        _FreeDOM_vDOMTree.set(this, void 0);
-        _FreeDOM_options.set(this, void 0);
-        console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
-        rootNode = _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode);
-        __classPrivateFieldSet(this, _FreeDOM_rootNode, rootNode, "f");
-        const tree = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(rootNode);
-        if (typeof tree == "string" || tree === null)
-            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
-        else
-            __classPrivateFieldSet(this, _FreeDOM_vDOMTree, tree, "f");
-        __classPrivateFieldSet(this, _FreeDOM_options, options, "f");
-        instances.push(this);
-    }
-    c(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    createNode(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    createElement(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    createVElement(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    h(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    createVNode(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    createNodeDescription(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    }
-    p(node) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
-    }
-    parseNode(node) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
-    }
-    b(vElement) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
-    }
-    buildNode(vElement) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
-    }
-    s() {
-    }
-    sync() {
-    }
-    r() {
-    }
-    rsync() {
-    }
-    __extractAttr__(element) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.extractAttr(element);
-    }
-    e(s, scope) { return _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(s, scope); }
-}
-_FreeDOM_rootNode = new WeakMap(), _FreeDOM_vDOMTree = new WeakMap(), _FreeDOM_options = new WeakMap();
-_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.constantize(FreeDOM);
-Object.defineProperty(window, "FreeDOM", {
-    configurable: false,
-    writable: false,
-    enumerable: true,
-    value: FreeDOM
-});
-
-})();
-
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/freedom.ts");
+/******/ 	
 /******/ })()
 ;
 //# sourceMappingURL=freedom.js.map

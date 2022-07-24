@@ -27,3 +27,8 @@ interface vElement{
     children :childrenArray | null;
     instance :Element | null;
 }
+type eventStore = Map<Element, Record<string, [{
+    handler: Function,
+    arg1: boolean | AddEventListenerOptions | undefined,
+    arg2: boolean | undefined
+}]>>;

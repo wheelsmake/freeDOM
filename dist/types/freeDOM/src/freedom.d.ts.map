@@ -1,1 +1,1 @@
-{"version":3,"file":"freedom.d.ts","sourceRoot":"","sources":["../../../../src/freedom.ts"],"names":[],"mappings":""}
+{"version":3,"file":"freedom.d.ts","sourceRoot":"","sources":["../../../../src/freedom.ts"],"names":[],"mappings":"AAWA,QAAA,MAAM,SAAS,EAAE,WAAW,EAAO,EAAE,UAAU,EAAE,UAAsB,CAAC;AACxE,OAAO,EAAC,SAAS,EAAE,UAAU,EAAC,CAAC;AAmG/B,cAAM,WAAW;;gBAID,QAAQ,EAAE,QAAQ,EAAE,OAAO,CAAC,EAAE,SAAS;IAoBnD,IAAI,QAAQ,IAAI,OAAO,CAAwB;IAC/C,IAAI,OAAO,IAAI,SAAS,GAAG,SAAS,CAAuB;IAE3D,CAAC;IAGD,KAAK;IAGL,CAAC;IAGD,OAAO;IAGP,CAAC;IAGD,IAAI;IAGJ,CAAC;IAGD,KAAK;CAGR"}
