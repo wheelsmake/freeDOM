@@ -27,6 +27,11 @@ interface vElement{
     children :childrenArray | null;
     instance :Element | null;
 }
+interface vText{
+    id :string | null;
+    text :string | null;
+    instance :Text | null;
+}
 type eventStore = Map<Element, Record<string, [{
     handler: Function,
     arg1: boolean | AddEventListenerOptions | undefined,

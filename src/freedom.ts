@@ -44,7 +44,7 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
                 console.log(useCapture);
                 for(let i = 0; i < record[eventName].length; i++){
                     const thisArg1 = record[eventName][i].arg1,
-                          thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false; //适应调用参数
+                          thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false; //适应调用参数L43
                     if(handler === record[eventName][i].handler && useCapture === thisUseCapture){ //找到了所谓完全一致的listener，走吧
                         isDuplicated = true;
                         break;
@@ -61,6 +61,10 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
                 handler, arg1, arg2
             }]
         });
+        //todo:对于once:true的事件需要在执行一次后删除，做法：传入一个hook过的函数
+        if(typeof arg1 == "object" && arg1["once"] === true){
+            
+        }
         return Reflect.apply(oEL, callerElement, argArray);
     }
 });
@@ -188,19 +192,7 @@ const FreeDOM = {
     createNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs, children);
     },
-    createElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
-    },
-    createVElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
-    },
     h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
-    },
-    createVNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
-    },
-    createNodeDescription(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs, children);
     },
     //结束 创建vDOM

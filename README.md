@@ -80,7 +80,7 @@ freeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(str
 |   `attr`   | 属性和事件 |
 | `children` | 子节点数组 |
 
-为了兼容，这个玩意也同时叫做 `createElement()`、`createVElement()`、`h()`、`createVNode()`、`createNodeDescription()`。
+为了兼容，这个玩意也同时叫做 `h()`。
 
 为了合乎 JSX 编译的标准，在不需要传入 `attr` 参数时可以使用 `null` 占位；并且 `children` 参数是可选的。
 

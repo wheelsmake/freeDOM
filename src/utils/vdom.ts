@@ -81,7 +81,7 @@ function extractAttr(element :Element) :anyObject | null{
     if(Object.keys(result).length === 0) return null;
     else return result;
 }
-function generateAttr(element :Element, data :vElement) :void{
+function buildAttr(element :Element, data :vElement) :void{
     const attrs = data.attrs;
     for(let i in attrs){
         //todo:别忘了事件
@@ -102,7 +102,7 @@ function getChildren(element :Element/* | Text*/) :childrenArray | undefined{
     if(result.length === 0) return undefined;
     else return result;
 }
-function generateChildren(element :Element, data :vElement) :void{
+function buildChildren(element :Element, data :vElement) :void{
     if(data.children === null) return;
     else{
         const children = data.children;
@@ -113,8 +113,8 @@ export function buildNode(vElement :vElement | string) :instance{
     if(isVElement(vElement)){
         vElement = vElement as vElement; //ts真无聊
         const instance = document.createElement(vElement.tagName);
-        generateAttr(instance, vElement);
-        generateChildren(instance, vElement);
+        buildAttr(instance, vElement);
+        buildChildren(instance, vElement);
         return instance;
     }
     else if(typeof vElement == "string") return document.createTextNode(vElement);
