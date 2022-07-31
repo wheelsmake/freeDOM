@@ -7,7 +7,7 @@
 
 # 定义
 
-虚拟 DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元，在程序中叫 `vElement`。
+虚拟 HTML DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元，在程序中叫 `vElement`。
 
 ```typescript
 interface vElement{
@@ -26,12 +26,24 @@ vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `chi
 type nodeTree = vElement;
 ```
 
+虚拟文本节点：叫 `vText`。
+
+```typescript
+interface vText{
+    id :string | null;
+    text :string | null;
+    instance :Text | null;
+}
+```
+
+
+
 # 开始使用
 
 实例化。
 
 ```typescript
-const freeDOM = FreeDOM.new(rootNode :Element | string, options? :fdOptions) :FreeDOMCore;
+const freeDOM = FreeDOM.new(rootNode :Element | string, options? :fdOptions) :ScopeInstance;
 ```
 
 |    属性    |               描述                |
@@ -49,29 +61,38 @@ interface fdOptions{
 
 # 特性
 
-1. freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s*/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。虽然 freeDOM 在处理上已经比较智能，但如果发现这损坏了文档，请在 [`options`](#开始使用) 中添加 `ignoreNLIText` 选项为 `true`。
+## 垃圾文本节点处理
 
-2. freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加载的 JavaScript 暴露元素的事件信息，freeDOM 无法获取元素已设置的事件。因此 freeDOM 使用了修改 `Element.addEventListener()` 的方法来达到监控元素的事件设置。所以，**请务必只使用 `element.addEventListener()` 为元素添加事件**，不要使用 `on*` 属性。如果仍要使用原先的方法（强烈不建议），可使用 `Element.oddEventListener()`。同时也修改了 `Element.removeEventListener()` 来接收删除信息，可用 `Element.oemoveEventListener()` 绕开。
+freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s*/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。虽然 freeDOM 在处理上已经比较智能，但如果发现这损坏了文档，请在 [`options`](#开始使用) 中添加 `ignoreNLIText` 选项为 `true`。
 
-   ```html
-   <script src="freedom.js"></script><!--必须先导入freeDOM-->
-   <script>
-       var freeDOM = new FreeDOM("#el");
-       el.addEventListener( //一个Proxy对象
-           ...
-       );
-   </script>
-   ```
+## 事件hack
+
+freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加载的 JavaScript 暴露元素的事件信息，freeDOM 无法获取元素已设置的事件。因此 freeDOM 使用了修改 `Element.addEventListener()` 的方法来监控元素的事件设置。
+
+如果需要让 freeDOM 精确重建节点的事件数据，**请务必只使用 `element.addEventListener()` 为元素添加事件**，不要使用 `on*` 属性。如果要绕开 freeDOM 的监测，可使用 `Element.oddEventListener()`。
+
+同时也修改了 `Element.removeEventListener()` 来接收删除信息，可用 `Element.oemoveEventListener()` 绕开。
 
 
-# API
+
+```html
+<script src="freedom.js"></script><!--必须先导入freeDOM-->
+<script>
+    var freeDOM = new FreeDOM("#el");
+    el.addEventListener( //一个Proxy对象
+        ...
+    );
+</script>
+```
+
+# 通用 API
 
 ## `createNode()`（`c()`）
 
 从参数创建 vDOM。
 
 ```typescript
-freeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(string | vElement)[]) :vElement;
+FreeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(string | vElement)[]) :vElement;
 ```
 
 |    属性    |    描述    |
@@ -89,7 +110,7 @@ freeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(str
 将 DOM 转换为 vDOM。
 
 ```typescript
-freeDOM.p(node :Node) :vElement | string | null;
+FreeDOM.p(node :Node) :vElement | string | null;
 ```
 
 |  属性  |   描述   |
@@ -103,7 +124,7 @@ freeDOM.p(node :Node) :vElement | string | null;
 将 vDOM 转换为 DOM。
 
 ```typescript
-freeDOM.b(vElement :vElement | string) :instance;
+FreeDOM.b(vElement :vElement | string) :instance;
 ```
 
 |    属性    | 描述 |
@@ -112,9 +133,13 @@ freeDOM.b(vElement :vElement | string) :instance;
 
 如果传入的不是 vDOM，将会引发错误。
 
+# 作用域内 API
+
 ## `sync()`（`s()`）
 
 将 vDOM 树同步至 DOM 树。没错，**需要开发者主动同步**，freeDOM 不会自动同步，目的是让开发者自己决定最终渲染的时机，以达到最佳性能，避免重复渲染。当然你也可以直接写 `requestAnimationFrame()` 来调用这个东西。
+
+
 
 ## `rsync()`（`r()`）
 
@@ -126,10 +151,10 @@ freeDOM.b(vElement :vElement | string) :instance;
 
 ## e
 
-> 开发者拥有选择 DOM 的权利。
+选择 DOM。
 
 ```typescript
-freeDOM.e(s :string, scope? :Element | Document) :Node | Node[];
+FreeDOM.e(s :string, scope? :Element | Document) :Node | Node[];
 ```
 
 |  属性   |                     描述                      |
@@ -138,20 +163,6 @@ freeDOM.e(s :string, scope? :Element | Document) :Node | Node[];
 | `scope` | `querySelector` 的作用域，不填默认 `document` |
 
 仅当传入选择器的最终选择器为 ID 选择器（即 `#` ）且获取到元素时返回 `Node` 类型单个元素，否则返回  `Node[]` 类型。
-
-# vDOM API
-
-## `adopt()`
-
-
-
-## `parent()`
-
-
-
-# 不应使用的 API
-
-无论在任何地方，以双下划线 `__` 作为开头和结尾的方法都不应调用。调用它们造成的问题均不作讨论或修复。
 
 # 其他
 
@@ -169,7 +180,7 @@ tsc -init
 
 不需要搭建，随时随地开发 :-)
 
-如果需要使用 `jsx` 之类的东西当然也可以自己加。`jsx` 的映射方法为 `freeDOM.h()` / `freeDOM.createNode()`（记得要改实例名称！）。
+如果需要使用 `jsx` 之类的东西当然也可以自己加。`jsx` 的映射方法为 `FreeDOM.createNode()`。
 
 ## 版权声明
 

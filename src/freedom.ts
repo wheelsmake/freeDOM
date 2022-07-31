@@ -9,7 +9,7 @@ import * as localUtils from "./utils/index";
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
 
 //事件捕获相关hack变量
-const instances :FreeDOMCore[] = [], eventStore :eventStore = new Map(); //Map浏览器支持率＞96% on 2022.7.23
+const instances :ScopeInstance[] = [], eventStore :eventStore = new Map(); //Map浏览器支持率＞96% on 2022.7.23
 export {instances, eventStore}; //暴露这两个变量给utils
 
 //hack addEventListener
@@ -24,15 +24,42 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
         argArray :[string, Function, boolean | AddEventListenerOptions | undefined, boolean | undefined]
         //第四个参数兼容wantUntrusted
     ){
-        //note:不需要检查type是否合法，因为存在自定义事件的可能
-        //note:选择记录所有DOM的所有事件，其实也不大
+        /* note:不需要检查type是否合法，因为存在自定义事件的可能
+         * 选择记录所有HTML DOM的所有事件，其实也不多
+        */
         console.log(callerElement, argArray);
-        const [eventName, handler, arg1, arg2] = argArray;
-        if(eventStore.has(callerElement)){ //本元素已被记录
-            const record = eventStore.get(callerElement)!;
-            if(record[eventName] === undefined) record[eventName] = [{ //本元素未有该事件，新建数组
-                handler, arg1, arg2
-            }];
+        const [eventName, handler, arg1, arg2] = argArray,
+              record = eventStore.get(callerElement),
+              useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false; //适应调用参数https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener#syntax
+        var processedHandler :Function;
+        if(typeof arg1 == "object" && arg1["once"] === true){ //处理once情况，调用后立即删除
+            processedHandler = new Proxy(handler, {
+                apply(target, thisArg, argArray){
+                    /* 不知道record会不会保存之前的值，我们还是再获取一遍吧
+                     * 既然运行了这个方法就不可能是undefined
+                    */
+                   console.log(processedHandler);
+                    const recordValue = eventStore.get(callerElement)![eventName];
+                    //还是得找才能删除
+                    for(let i = 0; i < recordValue.length; i++){
+                        const thisArg1 = recordValue[i].arg1,
+                              thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false; //适应调用参数L32
+                        if(recordValue[i].handler === processedHandler && thisUseCapture === useCapture){
+                            utils.generic.precisePop(recordValue[i], recordValue);
+                        }
+                    }
+                    return Reflect.apply(target, thisArg, argArray);
+                }
+            });
+        }
+        else processedHandler = handler;
+        if(record !== undefined){ //本元素已被记录
+            if(record[eventName] === undefined){
+                record[eventName] = [{ //本元素未有该事件，新建数组
+                    handler: processedHandler, arg1, arg2
+                }];
+                argArray[1] = processedHandler; //同L80
+            }
             else{  //本元素已有该事件
                 /* note:排除会被浏览器丢弃的调用。
                  * 浏览器将type、handler和useCapture完全一致listener认为是同一个，不管其他参数是否相同。
@@ -40,34 +67,37 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
                  * 否则浏览器不会更改已有listener，我们也不会对eventStore作更改
                 */
                 var isDuplicated = false; //为了能正常return的flag
-                const useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false; //适应调用参数，https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener#syntax
-                console.log(useCapture);
+                //console.log(useCapture);
                 for(let i = 0; i < record[eventName].length; i++){
                     const thisArg1 = record[eventName][i].arg1,
-                          thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false; //适应调用参数L43
+                          thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false; //适应调用参数L32
                     if(handler === record[eventName][i].handler && useCapture === thisUseCapture){ //找到了所谓完全一致的listener，走吧
                         isDuplicated = true;
                         break;
                     }
                 }
-                if(!isDuplicated) record[eventName].push({
-                    handler, arg1, arg2
-                });
+                if(!isDuplicated){
+                    record[eventName].push({
+                        handler: processedHandler, arg1, arg2
+                    });
+                    //这个不能放到最后，因为如果浏览器没有添加的话就会多出一个，必须在确保浏览器会添加这个事件后再修改参数
+                    argArray[1] = processedHandler;
+                }
             }
             eventStore.set(callerElement, record);
         }
-        else eventStore.set(callerElement, { //本元素未被记录
-            [eventName]: [{
-                handler, arg1, arg2
-            }]
-        });
-        //todo:对于once:true的事件需要在执行一次后删除，做法：传入一个hook过的函数
-        if(typeof arg1 == "object" && arg1["once"] === true){
-            
+        else{
+            eventStore.set(callerElement, { //本元素未被记录
+                [eventName]: [{
+                    handler: processedHandler, arg1, arg2
+                }]
+            });
+            argArray[1] = processedHandler; //同L80
         }
         return Reflect.apply(oEL, callerElement, argArray);
     }
 });
+
 
 Ep_A.oemoveEventListener = Ep.removeEventListener;
 Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
@@ -79,15 +109,15 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
         console.log(callerElement, argArray);
         const [eventName, handler, arg1] = argArray;
         if(eventStore.has(callerElement)){ //本元素已被记录
-            const record = eventStore.get(callerElement)!;
+            const record = eventStore.get(callerElement)!,
+                  useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false; //适应调用参数;
             if(record[eventName] !== undefined){ //本元素已有该类型事件
-                /* note:识别会被浏览器移除的listener。
+                /* note:识别真正会被浏览器移除的listener。
                  * 对于大多数浏览器来说，会检查remove的type、handler和useCapture是否一致
                  * 我们也是这样
                  * 对于其他浏览器暂不做支持，因为需要查很多资料，留个todo:吧
                  * https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/removeEventListener#:~:text=%E5%8F%AA%E6%9C%89%20capture%20%E9%85%8D%E7%BD%AE%E5%BD%B1%E5%93%8D%20removeEventListener().
                 */
-                const useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false; //适应调用参数，https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener#syntax
                 for(let i = 0; i < record[eventName].length; i++){
                     const thisArg1 = record[eventName][i].arg1,
                           thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false; //适应调用参数
@@ -113,7 +143,7 @@ function observerCB(mutations :MutationRecord[]){
 }
 
 //主类
-class FreeDOMCore{
+class ScopeInstance{
     #rootNode :Element;
     #options? :fdOptions;
     #vDOM? :vElement; //hack:ts真无聊
@@ -127,8 +157,8 @@ class FreeDOMCore{
 
         //获取vDOM并检测其合法性
         const tree = localUtils.vDOM.parseNode(rootNode);
-        if(typeof tree == "string" || tree === null) utils.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
-        else this.#vDOM = tree;
+        if(localUtils.vDOM.misc.isVText(tree) || tree === null) utils.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
+        else this.#vDOM = tree as vElement; //hack:ts真无聊
         
         //输入options
         this.#options = options;
@@ -169,8 +199,8 @@ class FreeDOMCore{
 //主对象
 const FreeDOM = {
     //创建实例
-    new(rootNode: Elementy, options?: fdOptions | undefined) :FreeDOMCore{
-        return new FreeDOMCore(rootNode, options);
+    new(rootNode: Elementy, options?: fdOptions | undefined) :ScopeInstance{
+        return new ScopeInstance(rootNode, options);
     },
     //信息获取
     get instances(){
@@ -185,37 +215,36 @@ const FreeDOM = {
         //问题同上第一条
         return new Map(eventStore);
     },
-    //创建vDOM
-    c(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    //vDOM
+    c(tagName :string, attrs? :SSkvObject | null, events? :eventRecord | null,  children? :childrenArray) :vElement | null{
+        return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
-    createNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    createNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement | null{
+        return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
-    h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs, children);
+    h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement | null{
+        return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
-    //结束 创建vDOM
-    //转换DOM
-    p(node :Node) :vElement | string | null{
+    p(node :Node) :vDOM | null{
         return localUtils.vDOM.parseNode(node);
     },
-    parseNode(node :Node) :vElement | string | null{
+    parseNode(node :Node) :vDOM | null{
         return localUtils.vDOM.parseNode(node);
     },
-    b(vElement :vElement | string) :instance{
+    b(vElement :vDOM) :instance{
         return localUtils.vDOM.buildNode(vElement);
     },
-    buildNode(vElement :vElement | string) :instance{
+    buildNode(vElement :vDOM) :instance{
         return localUtils.vDOM.buildNode(vElement);
     },
-    //结束 转换vDOM
+    //结束 vDOM
     //工具方法
     e(s :string, scope? :Element | Document) :Node | Node[]{return utils.element.e(s, scope);},
 }
 
 //对象导出
 utils.generic.constantize(FreeDOM);
+export default FreeDOM;
 Object.defineProperty(window, "FreeDOM", {
     configurable: false,
     writable: false,

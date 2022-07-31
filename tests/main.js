@@ -1,7 +1,7 @@
 ﻿const freeDOM = FreeDOM.new("#app");
 function asd(e){
     console.log(this);
-    console.log(e);
+    //console.log(e);
 }
 var aa = asd;
 //(aa)();
@@ -26,7 +26,7 @@ event1.addEventListener("click", asd,{
     once: true,
     passive: true
 });
-event1.addEventListener("click", asd, false);
-event1.addEventListener("click", f=>{}, true);
-event1.removeEventListener("click", asd, true);
-event1.removeEventListener("click", asd, false);
+//event1.addEventListener("click", asd, false);
+//event1.addEventListener("click", f=>{}, true);
+//event1.removeEventListener("click", asd, true);
+//event1.removeEventListener("click", asd, false);

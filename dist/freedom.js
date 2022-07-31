@@ -10,6 +10,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "eventStore": () => (/* binding */ eventStore),
 /* harmony export */   "instances": () => (/* binding */ instances)
 /* harmony export */ });
@@ -26,7 +27,7 @@ var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || 
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FreeDOMCore_rootNode, _FreeDOMCore_options, _FreeDOMCore_vDOM;
+var _ScopeInstance_rootNode, _ScopeInstance_options, _ScopeInstance_vDOM;
 
 
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
@@ -37,17 +38,34 @@ Ep_A.oddEventListener = Ep.addEventListener;
 Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
     apply(oEL, callerElement, argArray) {
         console.log(callerElement, argArray);
-        const [eventName, handler, arg1, arg2] = argArray;
-        if (eventStore.has(callerElement)) {
-            const record = eventStore.get(callerElement);
-            if (record[eventName] === undefined)
+        const [eventName, handler, arg1, arg2] = argArray, record = eventStore.get(callerElement), useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
+        var processedHandler;
+        if (typeof arg1 == "object" && arg1["once"] === true) {
+            processedHandler = new Proxy(handler, {
+                apply(target, thisArg, argArray) {
+                    console.log(processedHandler);
+                    const recordValue = eventStore.get(callerElement)[eventName];
+                    for (let i = 0; i < recordValue.length; i++) {
+                        const thisArg1 = recordValue[i].arg1, thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false;
+                        if (recordValue[i].handler === processedHandler && thisUseCapture === useCapture) {
+                            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.precisePop(recordValue[i], recordValue);
+                        }
+                    }
+                    return Reflect.apply(target, thisArg, argArray);
+                }
+            });
+        }
+        else
+            processedHandler = handler;
+        if (record !== undefined) {
+            if (record[eventName] === undefined) {
                 record[eventName] = [{
-                        handler, arg1, arg2
+                        handler: processedHandler, arg1, arg2
                     }];
+                argArray[1] = processedHandler;
+            }
             else {
                 var isDuplicated = false;
-                const useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
-                console.log(useCapture);
                 for (let i = 0; i < record[eventName].length; i++) {
                     const thisArg1 = record[eventName][i].arg1, thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false;
                     if (handler === record[eventName][i].handler && useCapture === thisUseCapture) {
@@ -55,19 +73,23 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
                         break;
                     }
                 }
-                if (!isDuplicated)
+                if (!isDuplicated) {
                     record[eventName].push({
-                        handler, arg1, arg2
+                        handler: processedHandler, arg1, arg2
                     });
+                    argArray[1] = processedHandler;
+                }
             }
             eventStore.set(callerElement, record);
         }
-        else
+        else {
             eventStore.set(callerElement, {
                 [eventName]: [{
-                        handler, arg1, arg2
+                        handler: processedHandler, arg1, arg2
                     }]
             });
+            argArray[1] = processedHandler;
+        }
         return Reflect.apply(oEL, callerElement, argArray);
     }
 });
@@ -77,9 +99,8 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
         console.log(callerElement, argArray);
         const [eventName, handler, arg1] = argArray;
         if (eventStore.has(callerElement)) {
-            const record = eventStore.get(callerElement);
+            const record = eventStore.get(callerElement), useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
             if (record[eventName] !== undefined) {
-                const useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
                 for (let i = 0; i < record[eventName].length; i++) {
                     const thisArg1 = record[eventName][i].arg1, thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false;
                     if (handler === record[eventName][i].handler && useCapture === thisUseCapture)
@@ -99,24 +120,24 @@ observer.observe(document, {
 function observerCB(mutations) {
     console.log(mutations);
 }
-class FreeDOMCore {
+class ScopeInstance {
     constructor(rootNode, options) {
-        _FreeDOMCore_rootNode.set(this, void 0);
-        _FreeDOMCore_options.set(this, void 0);
-        _FreeDOMCore_vDOM.set(this, void 0);
+        _ScopeInstance_rootNode.set(this, void 0);
+        _ScopeInstance_options.set(this, void 0);
+        _ScopeInstance_vDOM.set(this, void 0);
         console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
         rootNode = _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode);
-        __classPrivateFieldSet(this, _FreeDOMCore_rootNode, rootNode, "f");
+        __classPrivateFieldSet(this, _ScopeInstance_rootNode, rootNode, "f");
         const tree = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(rootNode);
-        if (typeof tree == "string" || tree === null)
-            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "Element | string", rootNode, "rootNode should be an Element or a #id selector");
+        if (_utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.misc.isVText(tree) || tree === null)
+            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
         else
-            __classPrivateFieldSet(this, _FreeDOMCore_vDOM, tree, "f");
-        __classPrivateFieldSet(this, _FreeDOMCore_options, options, "f");
+            __classPrivateFieldSet(this, _ScopeInstance_vDOM, tree, "f");
+        __classPrivateFieldSet(this, _ScopeInstance_options, options, "f");
         instances.push(this);
     }
-    get rootNode() { return __classPrivateFieldGet(this, _FreeDOMCore_rootNode, "f"); }
-    get options() { return __classPrivateFieldGet(this, _FreeDOMCore_options, "f"); }
+    get rootNode() { return __classPrivateFieldGet(this, _ScopeInstance_rootNode, "f"); }
+    get options() { return __classPrivateFieldGet(this, _ScopeInstance_options, "f"); }
     m() {
     }
     mount() {
@@ -134,10 +155,10 @@ class FreeDOMCore {
     rsync() {
     }
 }
-_FreeDOMCore_rootNode = new WeakMap(), _FreeDOMCore_options = new WeakMap(), _FreeDOMCore_vDOM = new WeakMap();
+_ScopeInstance_rootNode = new WeakMap(), _ScopeInstance_options = new WeakMap(), _ScopeInstance_vDOM = new WeakMap();
 const FreeDOM = {
     new(rootNode, options) {
-        return new FreeDOMCore(rootNode, options);
+        return new ScopeInstance(rootNode, options);
     },
     get instances() {
         return [...instances];
@@ -145,26 +166,14 @@ const FreeDOM = {
     get eventStore() {
         return new Map(eventStore);
     },
-    c(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+    c(tagName, attrs, events, children) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
     createNode(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    },
-    createElement(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    },
-    createVElement(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
     h(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    },
-    createVNode(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
-    },
-    createNodeDescription(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs, children);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
     p(node) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
@@ -181,6 +190,7 @@ const FreeDOM = {
     e(s, scope) { return _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(s, scope); },
 };
 _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.constantize(FreeDOM);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FreeDOM);
 Object.defineProperty(window, "FreeDOM", {
     configurable: false,
     writable: false,
@@ -240,22 +250,117 @@ function reduceToElement(input) {
 
 /***/ }),
 
-/***/ "./src/utils/vdom.ts":
-/*!***************************!*\
-  !*** ./src/utils/vdom.ts ***!
-  \***************************/
+/***/ "./src/utils/vdom.build.ts":
+/*!*********************************!*\
+  !*** ./src/utils/vdom.build.ts ***!
+  \*********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "buildNode": () => (/* binding */ buildNode),
-/* harmony export */   "createVElement": () => (/* binding */ createVElement),
-/* harmony export */   "parseNode": () => (/* binding */ parseNode)
+/* harmony export */   "Attr": () => (/* binding */ Attr),
+/* harmony export */   "Children": () => (/* binding */ Children)
+/* harmony export */ });
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "./src/utils/index.ts");
+
+function Attr(element, data) {
+    const attrs = data.attrs;
+    for (let i in attrs) {
+    }
+}
+function Children(element, data) {
+    if (data.children === null)
+        return;
+    else {
+        const children = data.children;
+        for (let i = 0; i < children.length; i++)
+            element.appendChild(_index__WEBPACK_IMPORTED_MODULE_0__.vDOM.buildNode(children[i]));
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/utils/vdom.get.ts":
+/*!*******************************!*\
+  !*** ./src/utils/vdom.get.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Attr": () => (/* binding */ Attr),
+/* harmony export */   "Children": () => (/* binding */ Children),
+/* harmony export */   "Event": () => (/* binding */ Event)
 /* harmony export */ });
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/index */ "../utils/index.ts");
-/* harmony import */ var _freedom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../freedom */ "./src/freedom.ts");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./index */ "./src/utils/index.ts");
+/* harmony import */ var _freedom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../freedom */ "./src/freedom.ts");
+/* harmony import */ var _vdom_misc__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vdom.misc */ "./src/utils/vdom.misc.ts");
 
 
+
+
+function Attr(element) {
+    const test = _vdom_misc__WEBPACK_IMPORTED_MODULE_3__.testNodeType(element);
+    if (test == "Text" || test === false)
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("element", "Element", element, "only Element have attributes");
+    const attr = element.attributes;
+    var result = {};
+    for (let i = 0; i < attr.length; i++)
+        result[attr[i].name] = attr[i].textContent;
+    if (Object.keys(result).length === 0)
+        return null;
+    else
+        return result;
+}
+function Event(node) {
+    if (_freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.has(node))
+        return _freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.get(node);
+    else
+        return null;
+}
+function Children(element) {
+    const children = element.childNodes;
+    var result = [];
+    for (let i = 0; i < children.length; i++) {
+        const item = children.item(i);
+        if (item === null) {
+            console.warn("DOM structure was changed during freeDOM is parsing nodes. Please avoid that.");
+            continue;
+        }
+        const test = _vdom_misc__WEBPACK_IMPORTED_MODULE_3__.testNodeType(item);
+        if (test == "Element")
+            result.push(_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(item));
+        else if (test == "Text") {
+            const node = _index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(item);
+            if (node !== null)
+                result.push(node);
+        }
+    }
+    console.log(result);
+    if (result.length === 0)
+        return null;
+    else
+        return result;
+}
+
+
+/***/ }),
+
+/***/ "./src/utils/vdom.misc.ts":
+/*!********************************!*\
+  !*** ./src/utils/vdom.misc.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "isVElement": () => (/* binding */ isVElement),
+/* harmony export */   "isVText": () => (/* binding */ isVText),
+/* harmony export */   "processNLIText": () => (/* binding */ processNLIText),
+/* harmony export */   "testNodeType": () => (/* binding */ testNodeType)
+/* harmony export */ });
 function testNodeType(node) {
     if (node instanceof Text)
         return "Text";
@@ -264,13 +369,21 @@ function testNodeType(node) {
     else
         return false;
 }
+function isVText(input) {
+    return (typeof input == "object"
+        && "id" in input
+        && "text" in input
+        && "instance" in input
+        && Object.keys(input).length == 3);
+}
 function isVElement(input) {
     return (typeof input == "object"
         && "id" in input
         && "tagName" in input
         && "attrs" in input
         && "children" in input
-        && "instance" in input);
+        && "instance" in input
+        && Object.keys(input).length == 5);
 }
 function processNLIText(textNode) {
     const textContent = textNode.textContent, signContent = textContent.replace(/\n\s*/g, ""), parent = textNode.parentElement;
@@ -290,89 +403,105 @@ function processNLIText(textNode) {
             return textContent;
     }
 }
-function createVElement(tagName, attrs, children, instance) {
+
+
+/***/ }),
+
+/***/ "./src/utils/vdom.ts":
+/*!***************************!*\
+  !*** ./src/utils/vdom.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "build": () => (/* reexport module object */ _vdom_build__WEBPACK_IMPORTED_MODULE_3__),
+/* harmony export */   "buildNode": () => (/* binding */ buildNode),
+/* harmony export */   "createVElement": () => (/* binding */ createVElement),
+/* harmony export */   "createVText": () => (/* binding */ createVText),
+/* harmony export */   "get": () => (/* reexport module object */ _vdom_get__WEBPACK_IMPORTED_MODULE_2__),
+/* harmony export */   "misc": () => (/* reexport module object */ _vdom_misc__WEBPACK_IMPORTED_MODULE_1__),
+/* harmony export */   "parseNode": () => (/* binding */ parseNode)
+/* harmony export */ });
+/* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/index */ "../utils/index.ts");
+/* harmony import */ var _vdom_misc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vdom.misc */ "./src/utils/vdom.misc.ts");
+/* harmony import */ var _vdom_get__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./vdom.get */ "./src/utils/vdom.get.ts");
+/* harmony import */ var _vdom_build__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vdom.build */ "./src/utils/vdom.build.ts");
+
+
+
+
+
+
+
+
+
+
+function createVElement(tagName, attrs, events, children, instance) {
+    if (typeof tagName != "string")
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("tagName", "string", tagName);
+    if (attrs !== null && attrs.toString() != "[object Object]")
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("attrs", "SSkvObject", attrs);
+    if (events !== null && events.toString() != "[object Object]")
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("events", "eventRecord", events);
+    if (children !== null && !(children instanceof Array))
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("children", "childrenArray", children);
+    if (instance !== null && !(instance instanceof Element))
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("instance", "Element", instance);
     return {
         id: _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15),
         tagName: tagName.toLocaleLowerCase(),
-        attrs: attrs || null,
-        children: children || null,
-        instance: instance || null
+        attrs,
+        events,
+        children,
+        instance
     };
 }
+function createVText(text, instance) {
+    if (instance !== null && !(instance instanceof Text))
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("instance", "Text", instance);
+    if (typeof text == "string")
+        return {
+            id: _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15),
+            text,
+            instance
+        };
+    else if (text === null)
+        return null;
+    else {
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("text", "string | null", text);
+        return null;
+    }
+}
 function parseNode(node) {
-    const test = testNodeType(node);
-    if (test == "Text")
-        return processNLIText(node);
+    const test = _vdom_misc__WEBPACK_IMPORTED_MODULE_1__.testNodeType(node);
+    if (test == "Text") {
+        const text = node;
+        return createVText(_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.processNLIText(text), text);
+    }
     else if (test == "Element") {
         const element = node;
-        return createVElement(element.tagName, extractAttr(element), getChildren(element), element);
+        return createVElement(element.tagName, _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Attr(element), _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Event(element), _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Children(element), element);
     }
     else {
-        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("node", "Element | Text", node);
-        return "";
-    }
-}
-function extractAttr(element) {
-    const test = testNodeType(element);
-    if (test == "Text" || test === false)
-        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("element", "Element", element, "only Element have attributes");
-    const attr = element.attributes;
-    var result = {};
-    for (let i = 0; i < attr.length; i++)
-        result[attr[i].name] = attr[i].textContent;
-    if (_freedom__WEBPACK_IMPORTED_MODULE_1__.eventStore.has(element)) {
-        const events = _freedom__WEBPACK_IMPORTED_MODULE_1__.eventStore.get(element);
-        for (let i = 0; i < Object.keys(events).length; i++) {
-        }
-    }
-    if (Object.keys(result).length === 0)
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("node", "instance", node);
         return null;
-    else
-        return result;
-}
-function generateAttr(element, data) {
-    const attrs = data.attrs;
-    for (let i in attrs) {
     }
 }
-function getChildren(element) {
-    const children = element.childNodes;
-    var result = [];
-    for (let i = 0; i < children.length; i++) {
-        const item = children.item(i);
-        if (item === null) {
-            console.warn("DOM structure was changed during freeDOM is parsing nodes. Please avoid that.");
-            continue;
-        }
-        else
-            parseNode(item);
-    }
-    if (result.length === 0)
-        return undefined;
-    else
-        return result;
-}
-function generateChildren(element, data) {
-    if (data.children === null)
-        return;
-    else {
-        const children = data.children;
-        for (let i = 0; i < children.length; i++)
-            buildNode(children[i]);
-    }
-}
-function buildNode(vElement) {
-    if (isVElement(vElement)) {
-        vElement = vElement;
-        const instance = document.createElement(vElement.tagName);
-        generateAttr(instance, vElement);
-        generateChildren(instance, vElement);
+function buildNode(vDOM) {
+    if (_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.isVElement(vDOM)) {
+        vDOM = vDOM;
+        const instance = document.createElement(vDOM.tagName);
+        _vdom_build__WEBPACK_IMPORTED_MODULE_3__.Attr(instance, vDOM);
+        _vdom_build__WEBPACK_IMPORTED_MODULE_3__.Children(instance, vDOM);
         return instance;
     }
-    else if (typeof vElement == "string")
-        return document.createTextNode(vElement);
+    else if (_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.isVText(vDOM)) {
+        vDOM = vDOM;
+        return document.createTextNode(vDOM.text);
+    }
     else {
-        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("vElement", "vElement", vElement);
+        _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("vDOM", "vDOM", vDOM);
         return new Element();
     }
 }
@@ -544,7 +673,7 @@ function E(argument, type, value, reason) {
     if (argument === undefined)
         throw new Error("An error occured.");
     else {
-        console.error(argument, type, value, reason);
+        console.info("ERROR INFO: argument", argument, ",type", type, ",value", value, ",reason", reason);
         throw new Error(`Argument '${argument}' ${type ? `should be a(an) ${type}` : "is invalid"}${reason ? `, reason: ${reason}` : ""}${value ? `, got ${value}` : ""}.`);
     }
 }
