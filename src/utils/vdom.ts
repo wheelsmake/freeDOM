@@ -55,7 +55,7 @@ export function parseNode(node :Node) :vDOM | null{
     const test = misc.testNodeType(node);
     if(test == "Text"){
         const text = node as Text;
-        return createVText(misc.processNLIText(text), text);
+        return createVText(misc.processNLIText(text), text); //createVText已经自动处理null情况了
     }
     else if(test == "Element"){
         const element = node as Element;
@@ -63,7 +63,7 @@ export function parseNode(node :Node) :vDOM | null{
     }
     else{
         utils.generic.E("node", "instance" , node);
-        return null; //hack:ts真无聊
+        return null; //ts真无聊
     }
 }
 export function buildNode(vDOM :vDOM) :instance{
@@ -71,6 +71,7 @@ export function buildNode(vDOM :vDOM) :instance{
         vDOM = vDOM as vElement; //ts真无聊
         const instance = document.createElement(vDOM.tagName);
         build.Attr(instance, vDOM);
+        build.Event(instance, vDOM);
         build.Children(instance, vDOM);
         return instance;
     }
@@ -80,6 +81,15 @@ export function buildNode(vDOM :vDOM) :instance{
     }
     else{
         utils.generic.E("vDOM", "vDOM", vDOM);
-        return new Element(); //hack:ts真无聊
+        return new Element(); //ts真无聊
+    }
+}
+export function unlink(vDOM :vDOM) :void{
+    vDOM.instance = null;
+    if(misc.isVElement(vDOM)){
+        vDOM = vDOM as vElement;
+        if(vDOM.children !== null) for(let i = 0; i < vDOM.children.length; i++){
+            //todo:解除instance和event绑定
+        }
     }
 }

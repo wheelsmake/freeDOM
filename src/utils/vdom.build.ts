@@ -8,8 +8,11 @@ import * as misc from "./vdom.misc";
 export function Attr(element :Element, data :vElement) :void{
     const attrs = data.attrs;
     for(let i in attrs){
-        //todo:别忘了事件
+        
     }
+}
+export function Event(element :Element, data :vElement){
+    //todo:
 }
 //review:这个方法不知道能不能用
 export function Children(element :Element, data :vElement) :void{

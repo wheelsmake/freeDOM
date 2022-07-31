@@ -7,11 +7,11 @@ import * as localUtils from "./index";
 //这个东西不能导出，否则ts会无法编译
 import * as FreeDOM from "../freedom";
 import * as misc from "./vdom.misc";
-export function Attr(element :Element) :anyObject | null{
+export function Attr(element :Element) :SSkvObject | null{
     const test = misc.testNodeType(element);
     if(test == "Text" || test === false) utils.generic.E("element", "Element", element, "only Element have attributes"); //文本节点不存在attr
     const attr = element.attributes; //typeof NamedNodeMap
-    var result :anyObject = {};
+    var result :SSkvObject = {};
     for(let i = 0; i < attr.length; i++) result[attr[i].name] = attr[i].textContent!; //只要传入已有name就不会出null
     if(Object.keys(result).length === 0) return null;
     else return result;
@@ -22,11 +22,11 @@ export function Event(node :Element) :eventRecord | null{
     else return null;
 }
 export function Children(element :Element/* | Text*/) :childrenArray | null{
-    const children :NodeList = element.childNodes;
-    //argument_solved:用NodeList能避免出现错误，并且可以获得尽可能最新的列表。
+    const children :Node[] = Array.from(element.childNodes);
+    //argument_solved 2022.7.31:只能用Node[]，因为垃圾文本节点会被删除造成必然缺陷。
     var result :vDOM[] = [];
     for(let i = 0; i < children.length; i++){
-        const item = children.item(i);
+        const item = children[i];
         if(item === null){ //这里可以避免缺陷for循环，因为i是对的，一个Element的childNodes不可能item出非Node，走到这里的唯一可能就是NodeList出缺陷了
             console.warn("DOM structure was changed during freeDOM is parsing nodes. Please avoid that.");
             continue;
@@ -39,7 +39,7 @@ export function Children(element :Element/* | Text*/) :childrenArray | null{
             //else null表示垃圾文本节点已经被删除，不需要记录了
         }
         //else 应该永远不会走到这里吧
-    }console.log(result);
-    if(result.length === 0) return null;
+    }
+    if(result.length == 0) return null;
     else return result;
 }

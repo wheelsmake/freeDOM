@@ -259,7 +259,8 @@ function reduceToElement(input) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Attr": () => (/* binding */ Attr),
-/* harmony export */   "Children": () => (/* binding */ Children)
+/* harmony export */   "Children": () => (/* binding */ Children),
+/* harmony export */   "Event": () => (/* binding */ Event)
 /* harmony export */ });
 /* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "./src/utils/index.ts");
 
@@ -267,6 +268,8 @@ function Attr(element, data) {
     const attrs = data.attrs;
     for (let i in attrs) {
     }
+}
+function Event(element, data) {
 }
 function Children(element, data) {
     if (data.children === null)
@@ -321,10 +324,10 @@ function Event(node) {
         return null;
 }
 function Children(element) {
-    const children = element.childNodes;
+    const children = Array.from(element.childNodes);
     var result = [];
     for (let i = 0; i < children.length; i++) {
-        const item = children.item(i);
+        const item = children[i];
         if (item === null) {
             console.warn("DOM structure was changed during freeDOM is parsing nodes. Please avoid that.");
             continue;
@@ -338,8 +341,7 @@ function Children(element) {
                 result.push(node);
         }
     }
-    console.log(result);
-    if (result.length === 0)
+    if (result.length == 0)
         return null;
     else
         return result;
@@ -381,14 +383,15 @@ function isVElement(input) {
         && "id" in input
         && "tagName" in input
         && "attrs" in input
+        && "events" in input
         && "children" in input
         && "instance" in input
-        && Object.keys(input).length == 5);
+        && Object.keys(input).length == 6);
 }
 function processNLIText(textNode) {
+    console.log(textNode);
     const textContent = textNode.textContent, signContent = textContent.replace(/\n\s*/g, ""), parent = textNode.parentElement;
-    const shouldKeepNLI = parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable);
-    if (shouldKeepNLI)
+    if (parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable))
         return textContent;
     else {
         if (signContent === "") {
@@ -397,7 +400,7 @@ function processNLIText(textNode) {
         }
         else if (signContent !== textContent) {
             textNode.textContent = textContent.replace(/\n\s*/g, " ");
-            return signContent;
+            return textNode.textContent;
         }
         else
             return textContent;
@@ -421,7 +424,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "createVText": () => (/* binding */ createVText),
 /* harmony export */   "get": () => (/* reexport module object */ _vdom_get__WEBPACK_IMPORTED_MODULE_2__),
 /* harmony export */   "misc": () => (/* reexport module object */ _vdom_misc__WEBPACK_IMPORTED_MODULE_1__),
-/* harmony export */   "parseNode": () => (/* binding */ parseNode)
+/* harmony export */   "parseNode": () => (/* binding */ parseNode),
+/* harmony export */   "unlink": () => (/* binding */ unlink)
 /* harmony export */ });
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/index */ "../utils/index.ts");
 /* harmony import */ var _vdom_misc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vdom.misc */ "./src/utils/vdom.misc.ts");
@@ -493,6 +497,7 @@ function buildNode(vDOM) {
         vDOM = vDOM;
         const instance = document.createElement(vDOM.tagName);
         _vdom_build__WEBPACK_IMPORTED_MODULE_3__.Attr(instance, vDOM);
+        _vdom_build__WEBPACK_IMPORTED_MODULE_3__.Event(instance, vDOM);
         _vdom_build__WEBPACK_IMPORTED_MODULE_3__.Children(instance, vDOM);
         return instance;
     }
@@ -503,6 +508,15 @@ function buildNode(vDOM) {
     else {
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("vDOM", "vDOM", vDOM);
         return new Element();
+    }
+}
+function unlink(vDOM) {
+    vDOM.instance = null;
+    if (_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.isVElement(vDOM)) {
+        vDOM = vDOM;
+        if (vDOM.children !== null)
+            for (let i = 0; i < vDOM.children.length; i++) {
+            }
     }
 }
 

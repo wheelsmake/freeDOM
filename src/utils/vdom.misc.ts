@@ -24,18 +24,21 @@ export function isVElement(input :any) :boolean{
      && "id" in input
      && "tagName" in input
      && "attrs" in input
+     && "events" in input
      && "children" in input
      && "instance" in input
-     && Object.keys(input).length == 5
+     && Object.keys(input).length == 6
     );
 }
 export function processNLIText(textNode :Text) :string | null{
+    //todo:解决末尾\n文本节点问题
+    console.log(textNode);
     const textContent = textNode.textContent!,
           //这个是用来标记原字符串是否需要处理的
           signContent = textContent.replace(/\n\s*/g, ""), //只有\n也要删
           parent = textNode.parentElement as Element; //replace不改动原字符串
-    const shouldKeepNLI = parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable); //排除可编辑内容的元素的内容
-    if(shouldKeepNLI) return textContent;
+    //排除可编辑内容的元素的内容
+    if(parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable)) return textContent;
     else{
         if(signContent === ""){ //完全就是垃圾节点
             textNode.remove();
@@ -43,7 +46,7 @@ export function processNLIText(textNode :Text) :string | null{
         }
         else if(signContent !== textContent){ //部分垃圾
             textNode.textContent = textContent.replace(/\n\s*/g, " "); //更新文本节点，插入空格，保持视觉效果
-            return signContent;
+            return textNode.textContent; //fixed:signContent和textContent都不一样，干嘛返回signContent啊
         }
         else return textContent; //没有垃圾
     }
