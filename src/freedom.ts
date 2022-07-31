@@ -169,6 +169,7 @@ class ScopeInstance{
     //属性获取
     get rootNode() :Element{return this.#rootNode;}
     get options() :fdOptions | undefined{return this.#options;}
+    get vDOM() :vElement | undefined{return this.#vDOM;}
     //vDOM API
     m(){
 
@@ -216,14 +217,22 @@ const FreeDOM = {
         return new Map(eventStore);
     },
     //vDOM
-    c(tagName :string, attrs? :SSkvObject | null, events? :eventRecord | null,  children? :childrenArray) :vElement | null{
+    c(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
-    createNode(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement | null{
+    createVElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
-    h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement | null{
+    h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+    },
+    t(text :string) :vText{
+        if(text === null) utils.generic.E("text", "string", text);
+        return localUtils.vDOM.createVText(text, null)!;
+    },
+    createVText(text :string) :vText{
+        if(text === null) utils.generic.E("text", "string", text);
+        return localUtils.vDOM.createVText(text, null)!;
     },
     p(node :Node) :vDOM | null{
         return localUtils.vDOM.parseNode(node);
@@ -236,6 +245,12 @@ const FreeDOM = {
     },
     buildNode(vElement :vDOM) :instance{
         return localUtils.vDOM.buildNode(vElement);
+    },
+    u(vDOM :vDOM) :vDOM{
+        return localUtils.vDOM.unlink(vDOM);
+    },
+    unlink(vDOM :vDOM) :vDOM{
+        return localUtils.vDOM.unlink(vDOM);
     },
     //结束 vDOM
     //工具方法

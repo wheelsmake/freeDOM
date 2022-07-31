@@ -1,4 +1,4 @@
-﻿const freeDOM = FreeDOM.new("#app");
+﻿const aaaaaaaaaa = FreeDOM.new("#app");
 function asd(e){
     console.log(this);
     //console.log(e);

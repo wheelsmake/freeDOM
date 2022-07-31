@@ -24,11 +24,9 @@ type eventRecord = Record<string, [{
     handler: Function,
     arg1: boolean | AddEventListenerOptions | undefined,
     arg2: boolean | undefined
-}]>
-
-
+}]>;
 interface vElement{
-    id :string | null;
+    id :string;
     tagName :string;
     attrs :SSkvObject | null;
     events :eventRecord | null;
@@ -36,7 +34,7 @@ interface vElement{
     instance :Element | null;
 }
 interface vText{
-    id :string | null;
+    id :string;
     text :string;
     //events :eventRecord | null; //Text注册的事件只能通过程序触发，用户无法触发，故不检测
     instance :Text | null;

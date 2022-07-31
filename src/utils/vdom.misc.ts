@@ -31,8 +31,7 @@ export function isVElement(input :any) :boolean{
     );
 }
 export function processNLIText(textNode :Text) :string | null{
-    //todo:解决末尾\n文本节点问题
-    console.log(textNode);
+    //fixme:存在末尾\n文本节点被浏览器自动加回去的问题，但不影响vDOM
     const textContent = textNode.textContent!,
           //这个是用来标记原字符串是否需要处理的
           signContent = textContent.replace(/\n\s*/g, ""), //只有\n也要删

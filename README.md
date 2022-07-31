@@ -11,10 +11,15 @@
 
 ```typescript
 interface vElement{
-    id :string | null;
+    id :string;
     tagName :string;
     attrs :Record<string, string> | null;
-    children :(string | vElement)[] | null;
+    events :Record<string, [{
+    	handler: Function,
+    	arg1: boolean | AddEventListenerOptions | undefined,
+    	arg2: boolean | undefined
+	}]> | null;
+    children :(vText | vElement)[] | null;
     instance :Element | null;
 }
 ```
@@ -30,13 +35,11 @@ type nodeTree = vElement;
 
 ```typescript
 interface vText{
-    id :string | null;
-    text :string | null;
+    id :string;
+    text :string;
     instance :Text | null;
 }
 ```
-
-
 
 # 开始使用
 
@@ -57,7 +60,7 @@ interface fdOptions{
 }
 ```
 
-后文默认使用名为 `freeDOM` 的实例。
+后文默认使用名为 `freeDOM` 的实例。注意区分大小写。
 
 # 特性
 
@@ -65,15 +68,13 @@ interface fdOptions{
 
 freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s*/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。虽然 freeDOM 在处理上已经比较智能，但如果发现这损坏了文档，请在 [`options`](#开始使用) 中添加 `ignoreNLIText` 选项为 `true`。
 
-## 事件hack
+## 事件 hack
 
 freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加载的 JavaScript 暴露元素的事件信息，freeDOM 无法获取元素已设置的事件。因此 freeDOM 使用了修改 `Element.addEventListener()` 的方法来监控元素的事件设置。
 
 如果需要让 freeDOM 精确重建节点的事件数据，**请务必只使用 `element.addEventListener()` 为元素添加事件**，不要使用 `on*` 属性。如果要绕开 freeDOM 的监测，可使用 `Element.oddEventListener()`。
 
 同时也修改了 `Element.removeEventListener()` 来接收删除信息，可用 `Element.oemoveEventListener()` 绕开。
-
-
 
 ```html
 <script src="freedom.js"></script><!--必须先导入freeDOM-->
@@ -85,14 +86,16 @@ freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加
 </script>
 ```
 
+- vDOM 中的·`events` 字段会**直接引用** freeDOM 的事件存储变量 `eventStore` 中的项，这意味着修改一个已有 DOM 元素的事件时，所有 vDOM 中如果存在由该 DOM 元素生成的 `vElement`，则其 `events` 字段会**实时更改**。如果不需要这个特性，可以使用 `unlink()` 方法将 vDOM 完全与 HTML 文档脱离联系。
+
 # 通用 API
 
-## `createNode()`（`c()`）
+## `createVElement()`（`c()`）
 
-从参数创建 vDOM。
+从参数创建 vElement。
 
 ```typescript
-FreeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(string | vElement)[]) :vElement;
+FreeDOM.c(tagName :string, attr? :SSkvObject | null, children? :childrenArray) :vElement;
 ```
 
 |    属性    |    描述    |
@@ -105,12 +108,24 @@ FreeDOM.c(tagName :string, attr? :Record<string, string> | null, children? :(str
 
 为了合乎 JSX 编译的标准，在不需要传入 `attr` 参数时可以使用 `null` 占位；并且 `children` 参数是可选的。
 
+## `createVText()`（`t()`）
+
+从参数创建 vText。
+
+```typescript
+FreeDOM.ct(text :string) :vText;
+```
+
+|  属性  |       描述       |
+| :----: | :--------------: |
+| `text` | 文本节点内容数据 |
+
 ## `parseNode()`（`p()`）
 
 将 DOM 转换为 vDOM。
 
 ```typescript
-FreeDOM.p(node :Node) :vElement | string | null;
+FreeDOM.p(node :Node) :vDOM | null;
 ```
 
 |  属性  |   描述   |
@@ -124,16 +139,38 @@ FreeDOM.p(node :Node) :vElement | string | null;
 将 vDOM 转换为 DOM。
 
 ```typescript
-FreeDOM.b(vElement :vElement | string) :instance;
+FreeDOM.b(vDOM :vDOM) :instance;
 ```
 
-|    属性    | 描述 |
-| :--------: | :--: |
-| `vElement` | vDOM |
+|  属性  | 描述 |
+| :----: | :--: |
+| `vDOM` | vDOM |
 
 如果传入的不是 vDOM，将会引发错误。
 
+## `unlink()`（`u()`）
+
+由 `parseNode()` 生成的 vDOM 记录了它的实例 `instance`，并且其 `events` 字段与 DOM 事件保持同步。如果需要获取不受 DOM 状态影响的 vDOM 则需要用 `unlink()`。
+
+```typescript
+FreeDOM.unlink(vDOM :vDOM) :vDOM;
+```
+
+|  属性  | 描述 |
+| :----: | :--: |
+| `vDOM` | vDOM |
+
+该方法返回的 vDOM 是复制得到的新对象。
+
 # 作用域内 API
+
+## `mount()`（`m()`）
+
+
+
+## `unmount()`（`u()`）
+
+
 
 ## `sync()`（`s()`）
 

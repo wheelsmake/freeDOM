@@ -138,6 +138,7 @@ class ScopeInstance {
     }
     get rootNode() { return __classPrivateFieldGet(this, _ScopeInstance_rootNode, "f"); }
     get options() { return __classPrivateFieldGet(this, _ScopeInstance_options, "f"); }
+    get vDOM() { return __classPrivateFieldGet(this, _ScopeInstance_vDOM, "f"); }
     m() {
     }
     mount() {
@@ -166,14 +167,24 @@ const FreeDOM = {
     get eventStore() {
         return new Map(eventStore);
     },
-    c(tagName, attrs, events, children) {
+    c(tagName, attrs, children) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
-    createNode(tagName, attrs, children) {
+    createVElement(tagName, attrs, children) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
     h(tagName, attrs, children) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+    },
+    t(text) {
+        if (text === null)
+            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("text", "string", text);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVText(text, null);
+    },
+    createVText(text) {
+        if (text === null)
+            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("text", "string", text);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVText(text, null);
     },
     p(node) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
@@ -186,6 +197,12 @@ const FreeDOM = {
     },
     buildNode(vElement) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
+    },
+    u(vDOM) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.unlink(vDOM);
+    },
+    unlink(vDOM) {
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.unlink(vDOM);
     },
     e(s, scope) { return _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(s, scope); },
 };
@@ -260,14 +277,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Attr": () => (/* binding */ Attr),
 /* harmony export */   "Children": () => (/* binding */ Children),
-/* harmony export */   "Event": () => (/* binding */ Event)
+/* harmony export */   "Event": () => (/* binding */ Event),
+/* harmony export */   "deltaAttr": () => (/* binding */ deltaAttr),
+/* harmony export */   "deltaChildren": () => (/* binding */ deltaChildren),
+/* harmony export */   "deltaEvent": () => (/* binding */ deltaEvent)
 /* harmony export */ });
 /* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "./src/utils/index.ts");
 
 function Attr(element, data) {
     const attrs = data.attrs;
-    for (let i in attrs) {
-    }
+    for (let i in attrs)
+        deltaAttr(element, i, attrs[i]);
 }
 function Event(element, data) {
 }
@@ -277,8 +297,16 @@ function Children(element, data) {
     else {
         const children = data.children;
         for (let i = 0; i < children.length; i++)
-            element.appendChild(_index__WEBPACK_IMPORTED_MODULE_0__.vDOM.buildNode(children[i]));
+            deltaChildren(element, children[i]);
     }
+}
+function deltaAttr(element, key, value) {
+    element.setAttribute(key, value);
+}
+function deltaEvent(element) {
+}
+function deltaChildren(element, childrenVDOM) {
+    element.appendChild(_index__WEBPACK_IMPORTED_MODULE_0__.vDOM.buildNode(childrenVDOM));
 }
 
 
@@ -389,7 +417,6 @@ function isVElement(input) {
         && Object.keys(input).length == 6);
 }
 function processNLIText(textNode) {
-    console.log(textNode);
     const textContent = textNode.textContent, signContent = textContent.replace(/\n\s*/g, ""), parent = textNode.parentElement;
     if (parent.tagName == "TEXTAREA" || (parent instanceof HTMLElement && parent.isContentEditable))
         return textContent;
@@ -518,6 +545,7 @@ function unlink(vDOM) {
             for (let i = 0; i < vDOM.children.length; i++) {
             }
     }
+    return vDOM;
 }
 
 

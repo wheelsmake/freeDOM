@@ -20,7 +20,7 @@ export function createVElement(
         events :eventRecord | null,
         children :childrenArray | null,
         instance :Element | null
-    ) :vElement | null{
+    ) :vElement{
     if(typeof tagName != "string") utils.generic.E("tagName", "string", tagName);
     //不完整验证
     if(attrs !== null && attrs.toString() != "[object Object]") utils.generic.E("attrs", "SSkvObject", attrs);
@@ -47,7 +47,7 @@ export function createVText(text :string | null, instance :Text | null) :vText |
     else if(text === null) return null;
     else{
         utils.generic.E("text", "string | null" , text);
-        return null; //hack:ts真无聊
+        return null; //ts真无聊
     }
 }
 /**`null` 仅在垃圾文本节点会出现*/
@@ -84,7 +84,7 @@ export function buildNode(vDOM :vDOM) :instance{
         return new Element(); //ts真无聊
     }
 }
-export function unlink(vDOM :vDOM) :void{
+export function unlink(vDOM :vDOM) :vDOM{
     vDOM.instance = null;
     if(misc.isVElement(vDOM)){
         vDOM = vDOM as vElement;
@@ -92,4 +92,5 @@ export function unlink(vDOM :vDOM) :void{
             //todo:解除instance和event绑定
         }
     }
+    return vDOM; //seize:不然编译不通过
 }
