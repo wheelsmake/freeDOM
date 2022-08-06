@@ -24,10 +24,8 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
         argArray :[string, Function, boolean | AddEventListenerOptions | undefined, boolean | undefined]
         //第四个参数兼容wantUntrusted
     ){
-        /* note:不需要检查type是否合法，因为存在自定义事件的可能
-         * 选择记录所有HTML DOM的所有事件，其实也不多
-        */
-        console.log(callerElement, argArray);
+        //note:不需要检查type是否合法，因为存在自定义事件的可能；选择记录所有HTML DOM的所有事件，其实也不多
+        //console.log(callerElement, argArray);
         const [eventName, handler, arg1, arg2] = argArray,
               record = eventStore.get(callerElement),
               useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false; //适应调用参数https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener#syntax
@@ -35,11 +33,9 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
         if(typeof arg1 == "object" && arg1["once"] === true){ //处理once情况，调用后立即删除
             processedHandler = new Proxy(handler, {
                 apply(target, thisArg, argArray){
-                    /* 不知道record会不会保存之前的值，我们还是再获取一遍吧
-                     * 既然运行了这个方法就不可能是undefined
-                    */
-                   console.log(processedHandler);
-                    const recordValue = eventStore.get(callerElement)![eventName];
+                    //console.log(processedHandler);
+                    //不知道record会不会保存之前的值，我们还是再获取一遍吧
+                    const recordValue = eventStore.get(callerElement)![eventName]; //既然运行了这个方法就不可能是undefined
                     //还是得找才能删除
                     for(let i = 0; i < recordValue.length; i++){
                         const thisArg1 = recordValue[i].arg1,
@@ -98,7 +94,6 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
     }
 });
 
-
 Ep_A.oemoveEventListener = Ep.removeEventListener;
 Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
     apply(
@@ -106,7 +101,7 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
         callerElement :Element,
         argArray :[string, Function, boolean | AddEventListenerOptions | undefined]
     ){
-        console.log(callerElement, argArray);
+        //console.log(callerElement, argArray);
         const [eventName, handler, arg1] = argArray;
         if(eventStore.has(callerElement)){ //本元素已被记录
             const record = eventStore.get(callerElement)!,
@@ -132,24 +127,16 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
     }
 });
 
-//全局mutationobserver
-const observer = new MutationObserver(observerCB);
-observer.observe(document, {
-    subtree: true,
-    childList: true
-});
-function observerCB(mutations :MutationRecord[]){
-    console.log(mutations);
-}
-
 //主类
 class ScopeInstance{
     #rootNode :Element;
     #options? :fdOptions;
-    #vDOM? :vElement; //hack:ts真无聊
+    #vDOM? :vElement;
+    #observer :MutationObserver;
+    #searchStore :searchStore = [[],[],[]];
     constructor(rootNode :Elementy, options? :fdOptions){
         //开发模式记录
-        console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
+        console.info("creating new freeDOM instance with rootNode", rootNode, "and options", options);
 
         //输入rootNode
         rootNode = localUtils.misc.reduceToElement(rootNode);
@@ -158,15 +145,32 @@ class ScopeInstance{
         //获取vDOM并检测其合法性
         const tree = localUtils.vDOM.parseNode(rootNode);
         if(localUtils.vDOM.misc.isVText(tree) || tree === null) utils.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
-        else this.#vDOM = tree as vElement; //hack:ts真无聊
+        else this.#vDOM = tree as vElement; //ts真无聊
         
         //输入options
         this.#options = options;
 
-        //记录实例，用于事件捕获
+        //初始化DOM监测器
+        this.#observer = new MutationObserver(this.#observerCB);
+        this.#observer.observe(this.#rootNode, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            characterDataOldValue: true,
+            attributes: true,
+            attributeOldValue: true
+        });
+
+        //记录实例
         instances.push(this);
     }
-    //属性获取
+    //DOM监测回调
+    #observerCB(mutations :MutationRecord[]) :void{
+        for(let i = 0; i < mutations.length; i++){
+
+        }
+    }
+    //属性获取note:get访问器返回值必须可以赋给set访问器
     get rootNode() :Element{return this.#rootNode;}
     get options() :fdOptions | undefined{return this.#options;}
     get vDOM() :vElement | undefined{return this.#vDOM;}
@@ -200,7 +204,7 @@ class ScopeInstance{
 //主对象
 const FreeDOM = {
     //创建实例
-    new(rootNode: Elementy, options?: fdOptions | undefined) :ScopeInstance{
+    new(rootNode: Elementy, options?: fdOptions) :ScopeInstance{
         return new ScopeInstance(rootNode, options);
     },
     //信息获取
@@ -216,7 +220,7 @@ const FreeDOM = {
         //问题同上第一条
         return new Map(eventStore);
     },
-    //vDOM
+//vDOM创建
     c(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
         return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
     },
@@ -234,6 +238,7 @@ const FreeDOM = {
         if(text === null) utils.generic.E("text", "string", text);
         return localUtils.vDOM.createVText(text, null)!;
     },
+//vDOM与DOM的转换
     p(node :Node) :vDOM | null{
         return localUtils.vDOM.parseNode(node);
     },
@@ -246,23 +251,17 @@ const FreeDOM = {
     buildNode(vElement :vDOM) :instance{
         return localUtils.vDOM.buildNode(vElement);
     },
-    u(vDOM :vDOM) :vDOM{
-        return localUtils.vDOM.unlink(vDOM);
+//vDOM对比
+    d(){
+        
     },
-    unlink(vDOM :vDOM) :vDOM{
-        return localUtils.vDOM.unlink(vDOM);
+    diff(){
+
     },
-    //结束 vDOM
-    //工具方法
+//工具方法
     e(s :string, scope? :Element | Document) :Node | Node[]{return utils.element.e(s, scope);},
 }
 
 //对象导出
 utils.generic.constantize(FreeDOM);
 export default FreeDOM;
-Object.defineProperty(window, "FreeDOM", {
-    configurable: false,
-    writable: false,
-    enumerable: true,
-    value: FreeDOM
-});

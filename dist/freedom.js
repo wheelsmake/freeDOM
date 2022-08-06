@@ -27,7 +27,7 @@ var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || 
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _ScopeInstance_rootNode, _ScopeInstance_options, _ScopeInstance_vDOM;
+var _ScopeInstance_instances, _ScopeInstance_rootNode, _ScopeInstance_options, _ScopeInstance_vDOM, _ScopeInstance_observer, _ScopeInstance_searchStore, _ScopeInstance_observerCB;
 
 
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
@@ -37,13 +37,11 @@ const Ep = Element.prototype, Ep_A = Ep;
 Ep_A.oddEventListener = Ep.addEventListener;
 Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
     apply(oEL, callerElement, argArray) {
-        console.log(callerElement, argArray);
         const [eventName, handler, arg1, arg2] = argArray, record = eventStore.get(callerElement), useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
         var processedHandler;
         if (typeof arg1 == "object" && arg1["once"] === true) {
             processedHandler = new Proxy(handler, {
                 apply(target, thisArg, argArray) {
-                    console.log(processedHandler);
                     const recordValue = eventStore.get(callerElement)[eventName];
                     for (let i = 0; i < recordValue.length; i++) {
                         const thisArg1 = recordValue[i].arg1, thisUseCapture = thisArg1 !== undefined ? typeof thisArg1 == "boolean" ? thisArg1 : thisArg1.capture || false : false;
@@ -96,7 +94,6 @@ Ep.addEventListener = new Proxy(Ep_A.oddEventListener, {
 Ep_A.oemoveEventListener = Ep.removeEventListener;
 Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
     apply(omEL, callerElement, argArray) {
-        console.log(callerElement, argArray);
         const [eventName, handler, arg1] = argArray;
         if (eventStore.has(callerElement)) {
             const record = eventStore.get(callerElement), useCapture = arg1 !== undefined ? typeof arg1 == "boolean" ? arg1 : arg1.capture || false : false;
@@ -112,20 +109,15 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
         return Reflect.apply(omEL, callerElement, argArray);
     }
 });
-const observer = new MutationObserver(observerCB);
-observer.observe(document, {
-    subtree: true,
-    childList: true
-});
-function observerCB(mutations) {
-    console.log(mutations);
-}
 class ScopeInstance {
     constructor(rootNode, options) {
+        _ScopeInstance_instances.add(this);
         _ScopeInstance_rootNode.set(this, void 0);
         _ScopeInstance_options.set(this, void 0);
         _ScopeInstance_vDOM.set(this, void 0);
-        console.info("creating new FreeDOM instance with rootNode", rootNode, "and options", options);
+        _ScopeInstance_observer.set(this, void 0);
+        _ScopeInstance_searchStore.set(this, [[], [], []]);
+        console.info("creating new freeDOM instance with rootNode", rootNode, "and options", options);
         rootNode = _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode);
         __classPrivateFieldSet(this, _ScopeInstance_rootNode, rootNode, "f");
         const tree = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(rootNode);
@@ -134,6 +126,15 @@ class ScopeInstance {
         else
             __classPrivateFieldSet(this, _ScopeInstance_vDOM, tree, "f");
         __classPrivateFieldSet(this, _ScopeInstance_options, options, "f");
+        __classPrivateFieldSet(this, _ScopeInstance_observer, new MutationObserver(__classPrivateFieldGet(this, _ScopeInstance_instances, "m", _ScopeInstance_observerCB)), "f");
+        __classPrivateFieldGet(this, _ScopeInstance_observer, "f").observe(__classPrivateFieldGet(this, _ScopeInstance_rootNode, "f"), {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            characterDataOldValue: true,
+            attributes: true,
+            attributeOldValue: true
+        });
         instances.push(this);
     }
     get rootNode() { return __classPrivateFieldGet(this, _ScopeInstance_rootNode, "f"); }
@@ -156,7 +157,10 @@ class ScopeInstance {
     rsync() {
     }
 }
-_ScopeInstance_rootNode = new WeakMap(), _ScopeInstance_options = new WeakMap(), _ScopeInstance_vDOM = new WeakMap();
+_ScopeInstance_rootNode = new WeakMap(), _ScopeInstance_options = new WeakMap(), _ScopeInstance_vDOM = new WeakMap(), _ScopeInstance_observer = new WeakMap(), _ScopeInstance_searchStore = new WeakMap(), _ScopeInstance_instances = new WeakSet(), _ScopeInstance_observerCB = function _ScopeInstance_observerCB(mutations) {
+    for (let i = 0; i < mutations.length; i++) {
+    }
+};
 const FreeDOM = {
     new(rootNode, options) {
         return new ScopeInstance(rootNode, options);
@@ -198,22 +202,14 @@ const FreeDOM = {
     buildNode(vElement) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
     },
-    u(vDOM) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.unlink(vDOM);
+    d() {
     },
-    unlink(vDOM) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.unlink(vDOM);
+    diff() {
     },
     e(s, scope) { return _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(s, scope); },
 };
 _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.constantize(FreeDOM);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FreeDOM);
-Object.defineProperty(window, "FreeDOM", {
-    configurable: false,
-    writable: false,
-    enumerable: true,
-    value: FreeDOM
-});
 
 
 /***/ }),
@@ -346,8 +342,19 @@ function Attr(element) {
         return result;
 }
 function Event(node) {
-    if (_freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.has(node))
-        return _freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.get(node);
+    if (_freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.has(node)) {
+        const record = _freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.get(node), result = {};
+        for (let eventName in record) {
+            result[eventName] = [];
+            for (let i = 0; i < record[eventName].length; i++) {
+                result[eventName][i] = {};
+                for (let member in record[eventName][i]) {
+                    result[eventName][i][member] = record[eventName][i][member];
+                }
+            }
+        }
+        return result;
+    }
     else
         return null;
 }
@@ -357,7 +364,7 @@ function Children(element) {
     for (let i = 0; i < children.length; i++) {
         const item = children[i];
         if (item === null) {
-            console.warn("DOM structure was changed during freeDOM is parsing nodes. Please avoid that.");
+            console.warn("DOM structure was changed during freeDOM's parsing nodes. Please avoid that.");
             continue;
         }
         const test = _vdom_misc__WEBPACK_IMPORTED_MODULE_3__.testNodeType(item);
@@ -451,8 +458,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "createVText": () => (/* binding */ createVText),
 /* harmony export */   "get": () => (/* reexport module object */ _vdom_get__WEBPACK_IMPORTED_MODULE_2__),
 /* harmony export */   "misc": () => (/* reexport module object */ _vdom_misc__WEBPACK_IMPORTED_MODULE_1__),
-/* harmony export */   "parseNode": () => (/* binding */ parseNode),
-/* harmony export */   "unlink": () => (/* binding */ unlink)
+/* harmony export */   "parseNode": () => (/* binding */ parseNode)
 /* harmony export */ });
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/index */ "../utils/index.ts");
 /* harmony import */ var _vdom_misc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vdom.misc */ "./src/utils/vdom.misc.ts");
@@ -536,16 +542,6 @@ function buildNode(vDOM) {
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("vDOM", "vDOM", vDOM);
         return new Element();
     }
-}
-function unlink(vDOM) {
-    vDOM.instance = null;
-    if (_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.isVElement(vDOM)) {
-        vDOM = vDOM;
-        if (vDOM.children !== null)
-            for (let i = 0; i < vDOM.children.length; i++) {
-            }
-    }
-    return vDOM;
 }
 
 
@@ -808,12 +804,24 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/freedom.ts");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/*!*******************************!*\
+  !*** ./src/freedom.export.ts ***!
+  \*******************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _freedom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./freedom */ "./src/freedom.ts");
+
+Object.defineProperty(window, "FreeDOM", {
+    configurable: false,
+    writable: false,
+    enumerable: true,
+    value: _freedom__WEBPACK_IMPORTED_MODULE_0__["default"]
+});
+
+})();
+
 /******/ })()
 ;
 //# sourceMappingURL=freedom.js.map

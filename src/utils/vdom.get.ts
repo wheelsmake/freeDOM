@@ -17,8 +17,22 @@ export function Attr(element :Element) :SSkvObject | null{
     else return result;
 }
 export function Event(node :Element) :eventRecord | null{
-    //传回的是对于Map Entry的引用，也就是说once:true的事件触发并删除后在vDOM里的events也会同步
-    if(FreeDOM.eventStore.has(node)) return FreeDOM.eventStore.get(node)!;
+    //fixed:这边可以这样写，通过import/export的FreeDOM.eventStore传回的就是eventStore本身，具有关联性
+    if(FreeDOM.eventStore.has(node)){
+        //浅复制eventStore，等于是保存元素当前的事件状态快照
+        //浅复制即可，浏览器删除事件监听器时不会销毁对象
+        const record = FreeDOM.eventStore.get(node)!, result :anyObject = {}; //ts真无聊
+        for(let eventName in record){
+            result[eventName] = [];
+            for(let i = 0; i < record[eventName].length; i++){
+                result[eventName][i] = {};
+                for(let member in record[eventName][i]){
+                    result[eventName][i][member] = (record[eventName][i] as anyObject)[member]; //ts真无聊
+                }
+            }
+        }
+        return result;
+    }
     else return null;
 }
 export function Children(element :Element/* | Text*/) :childrenArray | null{
@@ -28,7 +42,7 @@ export function Children(element :Element/* | Text*/) :childrenArray | null{
     for(let i = 0; i < children.length; i++){
         const item = children[i];
         if(item === null){ //这里可以避免缺陷for循环，因为i是对的，一个Element的childNodes不可能item出非Node，走到这里的唯一可能就是NodeList出缺陷了
-            console.warn("DOM structure was changed during freeDOM is parsing nodes. Please avoid that.");
+            console.warn("DOM structure was changed during freeDOM's parsing nodes. Please avoid that.");
             continue;
         }
         const test = misc.testNodeType(item);

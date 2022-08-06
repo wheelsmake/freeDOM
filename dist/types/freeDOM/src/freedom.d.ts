@@ -28,8 +28,8 @@ declare const FreeDOM: {
     parseNode(node: Node): vDOM | null;
     b(vElement: vDOM): instance;
     buildNode(vElement: vDOM): instance;
-    u(vDOM: vDOM): vDOM;
-    unlink(vDOM: vDOM): vDOM;
+    d(): void;
+    diff(): void;
     e(s: string, scope?: Element | Document): Node | Node[];
 };
 export default FreeDOM;

@@ -84,13 +84,3 @@ export function buildNode(vDOM :vDOM) :instance{
         return new Element(); //ts真无聊
     }
 }
-export function unlink(vDOM :vDOM) :vDOM{
-    vDOM.instance = null;
-    if(misc.isVElement(vDOM)){
-        vDOM = vDOM as vElement;
-        if(vDOM.children !== null) for(let i = 0; i < vDOM.children.length; i++){
-            //todo:解除instance和event绑定
-        }
-    }
-    return vDOM; //seize:不然编译不通过
-}

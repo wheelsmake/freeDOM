@@ -4,7 +4,7 @@ module.exports = {
     optimization: {
         minimize: false,
     },
-    entry: "./src/freedom.ts",
+    entry: "./src/freedom.export.ts",
     devtool: "source-map",
     output: {
         path: path.resolve(__dirname, "dist"),

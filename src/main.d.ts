@@ -16,27 +16,29 @@ type childrenArray = (vText | vElement)[];
 
 /*参数类型*/
 interface fdOptions{
-	ignoreNLIText :boolean;
+
 }
 
 /*定义类型*/
-type eventRecord = Record<string, [{
+type searchStore = [string[], instance[], vDOM[]];
+interface eventRecordInstance{
     handler: Function,
     arg1: boolean | AddEventListenerOptions | undefined,
     arg2: boolean | undefined
-}]>;
+};
+type eventRecord = Record<string, eventRecordInstance[]>;
+type eventStore = Map<Element, eventRecord>;
 interface vElement{
     id :string;
+    instance :Element | null;
     tagName :string;
     attrs :SSkvObject | null;
     events :eventRecord | null;
     children :childrenArray | null;
-    instance :Element | null;
 }
 interface vText{
     id :string;
+    instance :Text | null;
     text :string;
     //events :eventRecord | null; //Text注册的事件只能通过程序触发，用户无法触发，故不检测
-    instance :Text | null;
 }
-type eventStore = Map<Element, eventRecord>;

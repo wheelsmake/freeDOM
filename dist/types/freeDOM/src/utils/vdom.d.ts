@@ -5,5 +5,4 @@ export declare function createVElement(tagName: string, attrs: SSkvObject | null
 export declare function createVText(text: string | null, instance: Text | null): vText | null;
 export declare function parseNode(node: Node): vDOM | null;
 export declare function buildNode(vDOM: vDOM): instance;
-export declare function unlink(vDOM: vDOM): vDOM;
 //# sourceMappingURL=vdom.d.ts.map

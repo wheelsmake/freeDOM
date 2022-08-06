@@ -28,7 +28,7 @@ export function deltaAttr(element :Element, key :string, value :string) :void{
 }
 export function deltaEvent(element :Element) :void{
     //todo:
-
+    
 }
 export function deltaChildren(element :Element, childrenVDOM :vDOM) :void{
     element.appendChild(localUtils.vDOM.buildNode(childrenVDOM));

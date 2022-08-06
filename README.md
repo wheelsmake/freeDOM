@@ -7,46 +7,39 @@
 
 # 定义
 
-虚拟 HTML DOM 节点（简称 vDOM）：虚拟 DOM 结构的最小单元，在程序中叫 `vElement`。
+vDOM：虚拟 DOM 结构的最小单元，叫 `vElement`。
 
 ```typescript
 interface vElement{
     id :string;
-    tagName :string;
-    attrs :Record<string, string> | null;
-    events :Record<string, [{
-    	handler: Function,
-    	arg1: boolean | AddEventListenerOptions | undefined,
-    	arg2: boolean | undefined
-	}]> | null;
-    children :(vText | vElement)[] | null;
     instance :Element | null;
+    tagName :string;
+    attrs :SSkvObject | null;
+    events :eventRecord | null;
+    children :childrenArray | null;
 }
 ```
 
-vDOM 树（`nodeTree`）：由嵌套 vDOM 组成的对象。嵌套区域为 `children`。
-
-```typescript
-//代码中实际上不存在nodeTree类型，因为vDOM树的根节点类型还是vElement
-type nodeTree = vElement;
-```
+vDOM 树：由嵌套 vDOM 组成的对象。嵌套区域为 `children`。
 
 虚拟文本节点：叫 `vText`。
 
 ```typescript
 interface vText{
     id :string;
-    text :string;
     instance :Text | null;
+    text :string;
 }
 ```
+
+以下代码使用了 [`main.d.ts`](freeDOM/blob/main/src/main.d.ts) 文件中的定义类型。
 
 # 开始使用
 
 实例化。
 
 ```typescript
-const freeDOM = FreeDOM.new(rootNode :Element | string, options? :fdOptions) :ScopeInstance;
+const freeDOM = FreeDOM.new(rootNode :Elementy, options? :fdOptions) :ScopeInstance;
 ```
 
 |    属性    |               描述                |
@@ -54,30 +47,30 @@ const freeDOM = FreeDOM.new(rootNode :Element | string, options? :fdOptions) :Sc
 | `rootNode` | 根节点，该实例在 DOM 树中的作用域 |
 | `options`  |             配置参数              |
 
-```typescript
-interface fdOptions{
-	ignoreNLIText :boolean;
-}
-```
-
 后文默认使用名为 `freeDOM` 的实例。注意区分大小写。
 
 # 特性
 
+## 被动式
+
+freeDOM 不会将实例的 vDOM 与 DOM 状态保持一致，直到开发者调用 `sync()`——将 vDOM 状态覆盖至 DOM，或 `rsync()`——将 DOM 状态覆盖至 vDOM。
+
+freeDOM 无法直接「融合」 DOM 和 vDOM，但通过 `FreeDOM.buildNode()` + `FreeDOM.diff()` + `mount()` 可以间接实现。不建议这样做，因为大多数因为不知道用户对 DOM 进行了什么操作以至于需要「融合」 DOM 和 vDOM 的场景都可以通过向 `sync()` 或 `rsync()` 传入作用域参数来解决。
+
 ## 垃圾文本节点处理
 
-freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s*/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。虽然 freeDOM 在处理上已经比较智能，但如果发现这损坏了文档，请在 [`options`](#开始使用) 中添加 `ignoreNLIText` 选项为 `true`。
+freeDOM 针对日常 HTML 的书写存在换行缩进（`/\n\s*/`）的空白字符会被浏览器识别为合法文本节点的问题，**在创建实例时会自动将根节点子树上所有的此类文本进行处理**。
 
 ## 事件 hack
 
 freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加载的 JavaScript 暴露元素的事件信息，freeDOM 无法获取元素已设置的事件。因此 freeDOM 使用了修改 `Element.addEventListener()` 的方法来监控元素的事件设置。
 
-如果需要让 freeDOM 精确重建节点的事件数据，**请务必只使用 `element.addEventListener()` 为元素添加事件**，不要使用 `on*` 属性。如果要绕开 freeDOM 的监测，可使用 `Element.oddEventListener()`。
+如果需要让 freeDOM 精确重建节点的事件数据，**请务必只使用 `element.addEventListener()` 为元素添加事件**，不要使用 `on*` 属性；并且务必最先在页面中导入 freeDOM。如果要绕开 freeDOM 的监测，可使用 `Element.oddEventListener()`。
 
 同时也修改了 `Element.removeEventListener()` 来接收删除信息，可用 `Element.oemoveEventListener()` 绕开。
 
 ```html
-<script src="freedom.js"></script><!--必须先导入freeDOM-->
+<script src="freedom.js"></script>
 <script>
     var freeDOM = new FreeDOM("#el");
     el.addEventListener( //一个Proxy对象
@@ -86,7 +79,8 @@ freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加
 </script>
 ```
 
-- vDOM 中的·`events` 字段会**直接引用** freeDOM 的事件存储变量 `eventStore` 中的项，这意味着修改一个已有 DOM 元素的事件时，所有 vDOM 中如果存在由该 DOM 元素生成的 `vElement`，则其 `events` 字段会**实时更改**。如果不需要这个特性，可以使用 `unlink()` 方法将 vDOM 完全与 HTML 文档脱离联系。
+- 游离态 vDOM 中的·`events` 字段是创建时从 freeDOM 的事件存储 `eventStore` 中获取的元素**当时的事件监听器**。vDOM 保存的是「快照化」的元素。
+- 对于 `once:true` 的事件监听器（一次性），freeDOM 采取了修改传入函数为一个 `Proxy` 的方式来正确地在事件触发并被浏览器删除后同步删除 `eventStore` 中的记录。这对事件本身的执行并无影响。
 
 # 通用 API
 
@@ -113,7 +107,7 @@ FreeDOM.c(tagName :string, attr? :SSkvObject | null, children? :childrenArray) :
 从参数创建 vText。
 
 ```typescript
-FreeDOM.ct(text :string) :vText;
+FreeDOM.t(text :string) :vText;
 ```
 
 |  属性  |       描述       |
@@ -132,7 +126,7 @@ FreeDOM.p(node :Node) :vDOM | null;
 | :----: | :------: |
 | `node` | DOM 节点 |
 
-如果传入的节点是文本节点，那么该方法会返回其文本内容或 `null`（当文本节点完全是换行缩进时）。
+如果传入的节点是文本节点，那么该方法会返回其文本内容或 `null`（当文本节点完全符合 `/\n\s*/` 时）。
 
 ## `buildNode()`（`b()`）
 
@@ -148,19 +142,9 @@ FreeDOM.b(vDOM :vDOM) :instance;
 
 如果传入的不是 vDOM，将会引发错误。
 
-## `unlink()`（`u()`）
+## `diff()`（`d()`）
 
-由 `parseNode()` 生成的 vDOM 记录了它的实例 `instance`，并且其 `events` 字段与 DOM 事件保持同步。如果需要获取不受 DOM 状态影响的 vDOM 则需要用 `unlink()`。
 
-```typescript
-FreeDOM.unlink(vDOM :vDOM) :vDOM;
-```
-
-|  属性  | 描述 |
-| :----: | :--: |
-| `vDOM` | vDOM |
-
-该方法返回的 vDOM 是复制得到的新对象。
 
 # 作用域内 API
 
