@@ -32,7 +32,7 @@ interface vText{
 }
 ```
 
-以下代码使用了 [`main.d.ts`](freeDOM/blob/main/src/main.d.ts) 文件中的定义类型。
+以下代码使用了 [`main.d.ts`](freeDOM/blob/main/src/main.d.ts) 文件中的定义类型。建议同时打开该文件以获得更佳的理解。
 
 # 开始使用
 
@@ -51,11 +51,11 @@ const freeDOM = FreeDOM.new(rootNode :Elementy, options? :fdOptions) :ScopeInsta
 
 # 特性
 
-## 被动式
+## 被动式 DOM 管理
 
-freeDOM 不会将实例的 vDOM 与 DOM 状态保持一致，直到开发者调用 `sync()`——将 vDOM 状态覆盖至 DOM，或 `rsync()`——将 DOM 状态覆盖至 vDOM。
+freeDOM 不会将实例的 vDOM 与 DOM 状态保持一致，也完全不确定 vDOM 和 DOM 是否一致——直到开发者调用 `sync()` 将 vDOM 状态覆盖至 DOM，或 `rsync()` 将 DOM 状态覆盖至 vDOM。
 
-freeDOM 无法直接「融合」 DOM 和 vDOM，但通过 `FreeDOM.buildNode()` + `FreeDOM.diff()` + `mount()` 可以间接实现。不建议这样做，因为大多数因为不知道用户对 DOM 进行了什么操作以至于需要「融合」 DOM 和 vDOM 的场景都可以通过向 `sync()` 或 `rsync()` 传入作用域参数来解决。
+freeDOM 无法直接「融合」 DOM 和 vDOM，但通过 `FreeDOM.buildNode()` + `FreeDOM.diff()` + `mount()` 可以间接实现。不建议这样做，因为大多数因为不知道用户对 DOM 进行了什么操作以至于需要「融合」DOM 和 vDOM 的场景都可以通过向 `sync()` 或 `rsync()` 传入作用域参数来解决。
 
 ## 垃圾文本节点处理
 
@@ -83,6 +83,8 @@ freeDOM 不需要扩展任何语言的语法，但由于浏览器不对页面加
 - 对于 `once:true` 的事件监听器（一次性），freeDOM 采取了修改传入函数为一个 `Proxy` 的方式来正确地在事件触发并被浏览器删除后同步删除 `eventStore` 中的记录。这对事件本身的执行并无影响。
 
 # 通用 API
+
+通用 API 不针对某个特定的 DOM，使用全局作用域 `FreeDOM` 调用。
 
 ## `createVElement()`（`c()`）
 
@@ -144,15 +146,36 @@ FreeDOM.b(vDOM :vDOM) :instance;
 
 ## `diff()`（`d()`）
 
+对比两个 vDOM，得出最简单的将第一个转换为第二个的信息。
 
+在许多框架中，这个过程被融合在 `patch` 中——即生成转换方案后立即应用；但是 freeDOM 采用了交给开发者自主选择的另一种方案：`diff()` 和 `patch` 是分开的。实际上 freeDOM 的 `patch` 就是 `sync()`，为了方便才弄了 `patch()` 方法。
+
+```typescript
+FreeDOM.d(oldVDOM :vDOM, vDOM :vDOM) :vDOMBridge;
+```
+
+|   属性    |    描述     |
+| :-------: | :---------: |
+| `oldVDOM` | 前一个 vDOM |
+|  `vDOM`   | 后一个 vDOM |
+
+`typeof vDOMBridge` 是 freeDOM 中的 vDOM 转换指令数据结构，它非常容易理解，具体可查看 [`main.d.ts`](freeDOM/blob/main/src/main.d.ts)。
 
 # 作用域内 API
 
+作用域内 API 需要在特定实例中调用。注意大小写——下面的方法均以 `freeDOM`（小写的 `f`）这个**实例**为例。
+
 ## `mount()`（`m()`）
+
+将 vDOM 片段添加到实例现有的 vDOM 上。
+
+- 为什么 freeDOM 不支持将 vDOM 添加到 DOM 上？因为不同于其他框架，freeDOM 完全不会知道 DOM 变成了什么样子，所以
 
 
 
 ## `unmount()`（`u()`）
+
+将实例现有的 vDOM 上的 vDOM 片段删除。
 
 
 
@@ -165,6 +188,12 @@ FreeDOM.b(vDOM :vDOM) :instance;
 ## `rsync()`（`r()`）
 
 将真实 DOM 树同步至 vDOM 树，通常用于处理用户输入。
+
+
+
+## `patch()`（`p()`）
+
+可以理解为 `mount()` 和 `sync()` 的结合。这个方法完全可以被前面两个方法取代，为了方便起见提供了这个东西。
 
 
 
@@ -211,6 +240,6 @@ tsc -init
 
 ## 互动
 
-- 欢迎提出issue，但请保持冷静的态度和对事不对人的基本道德准则。
-- 请不要在未与我沟通的情况下发起PR。
+- 欢迎提出 issue，但请保持冷静的态度和对事不对人的基本道德准则。
+- 请不要在未与我沟通的情况下发起 PR。
 - 随便 fork。

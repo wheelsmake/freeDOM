@@ -24,18 +24,17 @@ export function Event(node :Element) :eventRecord | null{
         const record = FreeDOM.eventStore.get(node)!, result :anyObject = {}; //ts真无聊
         for(let eventName in record){
             result[eventName] = [];
-            for(let i = 0; i < record[eventName].length; i++){
-                result[eventName][i] = {};
-                for(let member in record[eventName][i]){
+            for(let i = 0; i < record[eventName].length; i++) result[eventName][i] = record[eventName][i];
+                //只需要复制到这里，参数对象内部无需遍历即可保持快照状态
+                /*for(let member in record[eventName][i]){
                     result[eventName][i][member] = (record[eventName][i] as anyObject)[member]; //ts真无聊
-                }
-            }
+                */
         }
         return result;
     }
     else return null;
 }
-export function Children(element :Element/* | Text*/) :childrenArray | null{
+export function Children(element :Element/* | Text*/) :childrenArray{
     const children :Node[] = Array.from(element.childNodes);
     //argument_solved 2022.7.31:只能用Node[]，因为垃圾文本节点会被删除造成必然缺陷。
     var result :vDOM[] = [];
@@ -49,11 +48,11 @@ export function Children(element :Element/* | Text*/) :childrenArray | null{
         if(test == "Element") result.push(localUtils.vDOM.parseNode(item)!); //递归产生处，Element不会null
         else if(test == "Text"){
             const node = localUtils.vDOM.parseNode(item); //递归产生处
-            if(node !== null) result.push(node);
-            //else null表示垃圾文本节点已经被删除，不需要记录了
+            if(node !== undefined) result.push(node!);
+            //else void表示垃圾文本节点已经被删除，不需要记录了
         }
         //else 应该永远不会走到这里吧
     }
-    if(result.length == 0) return null;
-    else return result;
+    //fixed:直接返回数组不就不用判定了吗？
+    return result;
 }

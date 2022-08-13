@@ -21,6 +21,7 @@ interface fdOptions{
 
 /*定义类型*/
 type searchStore = [string[], instance[], vDOM[]];
+type searchBlock = [string, instance, vDOM];
 interface eventRecordInstance{
     handler: Function,
     arg1: boolean | AddEventListenerOptions | undefined,
@@ -34,7 +35,7 @@ interface vElement{
     tagName :string;
     attrs :SSkvObject | null;
     events :eventRecord | null;
-    children :childrenArray | null;
+    children :childrenArray;
 }
 interface vText{
     id :string;

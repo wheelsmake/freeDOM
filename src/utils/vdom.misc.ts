@@ -30,8 +30,20 @@ export function isVElement(input :any) :boolean{
      && Object.keys(input).length == 6
     );
 }
+/****!PURE 非纯函数**
+ * 
+ * 检测某个文本节点是否为垃圾文本节点（即缩进造成的文本节点）
+ * 
+ * 这种文本节点会造成 vDOM 大小明显变大，必须处理
+ * 
+ * 如果全部垃圾，那么就直接删除这个节点并返回 `null`
+ * 
+ * 如果不完全垃圾，那么删除垃圾部分并返回剩下的 `textContent`
+ * 
+ * 如果没有垃圾或**被判定为豁免节点**，那么直接返回 `textContent`
+ */
 export function processNLIText(textNode :Text) :string | null{
-    //fixme:存在末尾\n文本节点被浏览器自动加回去的问题，但不影响vDOM
+    //fixme:存在末尾\n文本节点被浏览器自动加回去的问题（但并未影响vDOM）
     const textContent = textNode.textContent!,
           //这个是用来标记原字符串是否需要处理的
           signContent = textContent.replace(/\n\s*/g, ""), //只有\n也要删

@@ -9,16 +9,19 @@ import * as localUtils from "./index";
 import * as misc from "./vdom.misc";
 import * as get from "./vdom.get";
 import * as build from "./vdom.build";
+import * as diff from "./vdom.diff";
 
 export * as misc from "./vdom.misc";
 export * as get from "./vdom.get";
 export * as build from "./vdom.build";
+export * as diff from "./vdom.diff";
 
 export function createVElement(
+        id :string,
         tagName :string,
         attrs :SSkvObject | null,
         events :eventRecord | null,
-        children :childrenArray | null,
+        children :childrenArray,
         instance :Element | null
     ) :vElement{
     if(typeof tagName != "string") utils.generic.E("tagName", "string", tagName);
@@ -28,43 +31,39 @@ export function createVElement(
     if(children !== null && !(children instanceof Array)) utils.generic.E("children", "childrenArray", children);
     if(instance !== null && !(instance instanceof Element)) utils.generic.E("instance", "Element", instance);
     return{
-        id: utils.generic.randoma2Z(15),
+        id,
         tagName: tagName.toLocaleLowerCase(), //fixed:我是傻逼
         attrs,
         events,
-        children,
+        children: children,
         instance
     };
 }
-export function createVText(text :string | null, instance :Text | null) :vText | null{
+export function createVText(id :string, text :string, instance :Text | null) :vText | void{
     //不完整验证
     if(instance !== null && !(instance instanceof Text)) utils.generic.E("instance", "Text", instance);
     if(typeof text == "string") return{
-        id: utils.generic.randoma2Z(15),
+        id,
         text,
         instance
     };
-    else if(text === null) return null;
-    else{
-        utils.generic.E("text", "string | null" , text);
-        return null; //ts真无聊
-    }
+    else utils.generic.E("text", "string | null" , text);
 }
 /**`null` 仅在垃圾文本节点会出现*/
-export function parseNode(node :Node) :vDOM | null{
-    const test = misc.testNodeType(node);
+export function parseNode(node :Node) :vDOM | void{
+    const test = misc.testNodeType(node), id = utils.generic.randoma2Z(15);
     if(test == "Text"){
-        const text = node as Text;
-        return createVText(misc.processNLIText(text), text); //createVText已经自动处理null情况了
+        const textNode = node as Text,
+              NLIresult = misc.processNLIText(textNode);
+        if(NLIresult !== null) return createVText(id, NLIresult , textNode)!;
+        //fixed:太多方法将null作为错误返回值了，其实应该返回void的
     }
     else if(test == "Element"){
-        const element = node as Element;
-        return createVElement(element.tagName, get.Attr(element), get.Event(element), get.Children(element), element);
+        const element = node as Element,
+              result = createVElement(id, element.tagName, get.Attr(element), get.Event(element), get.Children(element), element);
+        return result;
     }
-    else{
-        utils.generic.E("node", "instance" , node);
-        return null; //ts真无聊
-    }
+    else utils.generic.E("node", "instance" , node);
 }
 export function buildNode(vDOM :vDOM) :instance{
     if(misc.isVElement(vDOM)){

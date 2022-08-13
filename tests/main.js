@@ -1,5 +1,4 @@
-﻿const aaaaaaaaaa = FreeDOM.new("#app");
-function asd(e){
+﻿function asd(e){
     console.log(this);
     //console.log(e);
 }
@@ -30,3 +29,7 @@ event1.addEventListener("click", asd,{
 //event1.addEventListener("click", f=>{}, true);
 //event1.removeEventListener("click", asd, true);
 //event1.removeEventListener("click", asd, false);
+const aaaaaaaaaa = FreeDOM.new("#app");
+const abcd = FreeDOM.new("#appp");
+var newa = FreeDOM.h("div", null, [FreeDOM.h("h2",{id:"12"},null)]);
+abcd.mount(newa);

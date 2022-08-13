@@ -5,3 +5,9 @@
 import * as utils from "../../../utils/index";
 import * as localUtils from "./index";
 import * as misc from "./vdom.misc";
+export function diff(){
+    
+}
+export function patch(){
+
+}

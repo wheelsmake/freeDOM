@@ -131,8 +131,10 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
 class ScopeInstance{
     #rootNode :Element;
     #options? :fdOptions;
-    #vDOM? :vElement;
-    #observer :MutationObserver;
+    #oldVDOM :vElement;
+    #vDOM :vElement;
+    //#observer :MutationObserver;
+    #oldSearchStore :searchStore = [[],[],[]];
     #searchStore :searchStore = [[],[],[]];
     constructor(rootNode :Elementy, options? :fdOptions){
         //开发模式记录
@@ -144,13 +146,17 @@ class ScopeInstance{
 
         //获取vDOM并检测其合法性
         const tree = localUtils.vDOM.parseNode(rootNode);
-        if(localUtils.vDOM.misc.isVText(tree) || tree === null) utils.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
+        if(localUtils.vDOM.misc.isVText(tree) || tree === null){
+            utils.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
+            throw new Error(); //ts真无聊，上一行代码就是抛出异常的，不会执行到这里的
+        }
         else this.#vDOM = tree as vElement; //ts真无聊
+        this.#oldVDOM = this.#vDOM;
         
         //输入options
         this.#options = options;
 
-        //初始化DOM监测器
+        /*初始化DOM监测器
         this.#observer = new MutationObserver(this.#observerCB);
         this.#observer.observe(this.#rootNode, {
             childList: true,
@@ -159,55 +165,59 @@ class ScopeInstance{
             characterDataOldValue: true,
             attributes: true,
             attributeOldValue: true
-        });
+        });*/
 
         //记录实例
         instances.push(this);
     }
-    //DOM监测回调
+    /*DOM监测回调
     #observerCB(mutations :MutationRecord[]) :void{
         for(let i = 0; i < mutations.length; i++){
-
+            console.log(mutations[i]);
+            //
         }
-    }
-    //属性获取note:get访问器返回值必须可以赋给set访问器
+    }*/
+    //属性获取
+    //note:get访问器返回值必须可以赋给set访问器
     get rootNode() :Element{return this.#rootNode;}
     get options() :fdOptions | undefined{return this.#options;}
     get vDOM() :vElement | undefined{return this.#vDOM;}
     //vDOM API
-    m(){
+    m(location :string | vElement, index :number | string, subTree :vDOM) :void{
+        const vDOM = this.#vDOM;
+        if(location !== vDOM.id) for(let i = 0; i < vDOM.children.length; i++){
 
+        }
+        else vDOM.children.splice(index as number, 0, subTree);
     }
-    mount(){
-
-    }
+    mount(location :string | vElement, index :number | string, subTree :vDOM) :void{return this.m(location, index, subTree);}
     u(){
 
     }
     unmount(){
-
+        return this.u();
     }
     s(){
 
     }
     sync(){
-
+        return this.s();
     }
     r(){
 
     }
     rsync(){
-        
+        return this.r();
     }
 }
 
 //主对象
 const FreeDOM = {
-    //创建实例
+//创建实例
     new(rootNode: Elementy, options?: fdOptions) :ScopeInstance{
         return new ScopeInstance(rootNode, options);
     },
-    //信息获取
+//信息获取
     get instances(){
         /* 不能将instances直接传出！
          * 第一：会暴露内部变量的地址；
@@ -222,28 +232,28 @@ const FreeDOM = {
     },
 //vDOM创建
     c(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+        return localUtils.vDOM.createVElement(utils.generic.randoma2Z(15), tagName, attrs || null, null, children || [], null);
     },
     createVElement(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+        return localUtils.vDOM.createVElement(utils.generic.randoma2Z(15), tagName, attrs || null, null, children || [], null);
     },
     h(tagName :string, attrs? :SSkvObject | null, children? :childrenArray) :vElement{
-        return localUtils.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+        return localUtils.vDOM.createVElement(utils.generic.randoma2Z(15), tagName, attrs || null, null, children || [], null);
     },
-    t(text :string) :vText{
-        if(text === null) utils.generic.E("text", "string", text);
-        return localUtils.vDOM.createVText(text, null)!;
+    t(text :string) :vText | null{
+        return localUtils.vDOM.createVText(utils.generic.randoma2Z(15), text, null) || null;
     },
-    createVText(text :string) :vText{
-        if(text === null) utils.generic.E("text", "string", text);
-        return localUtils.vDOM.createVText(text, null)!;
+    createVText(text :string) :vText | null{
+        return localUtils.vDOM.createVText(utils.generic.randoma2Z(15), text, null) || null;
     },
 //vDOM与DOM的转换
     p(node :Node) :vDOM | null{
-        return localUtils.vDOM.parseNode(node);
+        const result = localUtils.vDOM.parseNode(node);
+        return result || null;
     },
     parseNode(node :Node) :vDOM | null{
-        return localUtils.vDOM.parseNode(node);
+        const result = localUtils.vDOM.parseNode(node);
+        return result || null;
     },
     b(vElement :vDOM) :instance{
         return localUtils.vDOM.buildNode(vElement);

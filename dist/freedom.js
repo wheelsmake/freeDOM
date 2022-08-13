@@ -27,7 +27,7 @@ var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || 
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _ScopeInstance_instances, _ScopeInstance_rootNode, _ScopeInstance_options, _ScopeInstance_vDOM, _ScopeInstance_observer, _ScopeInstance_searchStore, _ScopeInstance_observerCB;
+var _ScopeInstance_rootNode, _ScopeInstance_options, _ScopeInstance_oldVDOM, _ScopeInstance_vDOM, _ScopeInstance_oldSearchStore, _ScopeInstance_searchStore;
 
 
 console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
@@ -111,56 +111,55 @@ Ep.removeEventListener = new Proxy(Ep_A.oemoveEventListener, {
 });
 class ScopeInstance {
     constructor(rootNode, options) {
-        _ScopeInstance_instances.add(this);
         _ScopeInstance_rootNode.set(this, void 0);
         _ScopeInstance_options.set(this, void 0);
+        _ScopeInstance_oldVDOM.set(this, void 0);
         _ScopeInstance_vDOM.set(this, void 0);
-        _ScopeInstance_observer.set(this, void 0);
+        _ScopeInstance_oldSearchStore.set(this, [[], [], []]);
         _ScopeInstance_searchStore.set(this, [[], [], []]);
         console.info("creating new freeDOM instance with rootNode", rootNode, "and options", options);
         rootNode = _utils_index__WEBPACK_IMPORTED_MODULE_1__.misc.reduceToElement(rootNode);
         __classPrivateFieldSet(this, _ScopeInstance_rootNode, rootNode, "f");
         const tree = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(rootNode);
-        if (_utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.misc.isVText(tree) || tree === null)
+        if (_utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.misc.isVText(tree) || tree === null) {
             _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
+            throw new Error();
+        }
         else
             __classPrivateFieldSet(this, _ScopeInstance_vDOM, tree, "f");
+        __classPrivateFieldSet(this, _ScopeInstance_oldVDOM, __classPrivateFieldGet(this, _ScopeInstance_vDOM, "f"), "f");
         __classPrivateFieldSet(this, _ScopeInstance_options, options, "f");
-        __classPrivateFieldSet(this, _ScopeInstance_observer, new MutationObserver(__classPrivateFieldGet(this, _ScopeInstance_instances, "m", _ScopeInstance_observerCB)), "f");
-        __classPrivateFieldGet(this, _ScopeInstance_observer, "f").observe(__classPrivateFieldGet(this, _ScopeInstance_rootNode, "f"), {
-            childList: true,
-            subtree: true,
-            characterData: true,
-            characterDataOldValue: true,
-            attributes: true,
-            attributeOldValue: true
-        });
         instances.push(this);
     }
     get rootNode() { return __classPrivateFieldGet(this, _ScopeInstance_rootNode, "f"); }
     get options() { return __classPrivateFieldGet(this, _ScopeInstance_options, "f"); }
     get vDOM() { return __classPrivateFieldGet(this, _ScopeInstance_vDOM, "f"); }
-    m() {
+    m(location, index, subTree) {
+        const vDOM = __classPrivateFieldGet(this, _ScopeInstance_vDOM, "f");
+        if (location !== vDOM.id)
+            for (let i = 0; i < vDOM.children.length; i++) {
+            }
+        else
+            vDOM.children.splice(index, 0, subTree);
     }
-    mount() {
-    }
+    mount(location, index, subTree) { return this.m(location, index, subTree); }
     u() {
     }
     unmount() {
+        return this.u();
     }
     s() {
     }
     sync() {
+        return this.s();
     }
     r() {
     }
     rsync() {
+        return this.r();
     }
 }
-_ScopeInstance_rootNode = new WeakMap(), _ScopeInstance_options = new WeakMap(), _ScopeInstance_vDOM = new WeakMap(), _ScopeInstance_observer = new WeakMap(), _ScopeInstance_searchStore = new WeakMap(), _ScopeInstance_instances = new WeakSet(), _ScopeInstance_observerCB = function _ScopeInstance_observerCB(mutations) {
-    for (let i = 0; i < mutations.length; i++) {
-    }
-};
+_ScopeInstance_rootNode = new WeakMap(), _ScopeInstance_options = new WeakMap(), _ScopeInstance_oldVDOM = new WeakMap(), _ScopeInstance_vDOM = new WeakMap(), _ScopeInstance_oldSearchStore = new WeakMap(), _ScopeInstance_searchStore = new WeakMap();
 const FreeDOM = {
     new(rootNode, options) {
         return new ScopeInstance(rootNode, options);
@@ -172,29 +171,27 @@ const FreeDOM = {
         return new Map(eventStore);
     },
     c(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15), tagName, attrs || null, null, children || [], null);
     },
     createVElement(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15), tagName, attrs || null, null, children || [], null);
     },
     h(tagName, attrs, children) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(tagName, attrs || null, null, children || null, null);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVElement(_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15), tagName, attrs || null, null, children || [], null);
     },
     t(text) {
-        if (text === null)
-            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("text", "string", text);
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVText(text, null);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVText(_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15), text, null) || null;
     },
     createVText(text) {
-        if (text === null)
-            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("text", "string", text);
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVText(text, null);
+        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.createVText(_utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15), text, null) || null;
     },
     p(node) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
+        const result = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
+        return result || null;
     },
     parseNode(node) {
-        return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
+        const result = _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(node);
+        return result || null;
     },
     b(vElement) {
         return _utils_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.buildNode(vElement);
@@ -243,6 +240,7 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "pushSearchStore": () => (/* binding */ pushSearchStore),
 /* harmony export */   "reduceToElement": () => (/* binding */ reduceToElement)
 /* harmony export */ });
 /* harmony import */ var _utils_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../utils/index */ "../utils/index.ts");
@@ -254,10 +252,14 @@ function reduceToElement(input) {
         const el = _utils_index__WEBPACK_IMPORTED_MODULE_0__.element.e(input);
         if (el instanceof Node)
             return el;
+        else
+            _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "string | Element", input, "rootNode should be a VALID #id selector");
     }
     else
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("rootNode", "string | Element", input, "rootNode should be a #id selector or an Element");
     return new Element();
+}
+function pushSearchStore(searchStore, searchBlock) {
 }
 
 
@@ -308,6 +310,25 @@ function deltaChildren(element, childrenVDOM) {
 
 /***/ }),
 
+/***/ "./src/utils/vdom.diff.ts":
+/*!********************************!*\
+  !*** ./src/utils/vdom.diff.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "diff": () => (/* binding */ diff),
+/* harmony export */   "patch": () => (/* binding */ patch)
+/* harmony export */ });
+function diff() {
+}
+function patch() {
+}
+
+
+/***/ }),
+
 /***/ "./src/utils/vdom.get.ts":
 /*!*******************************!*\
   !*** ./src/utils/vdom.get.ts ***!
@@ -346,12 +367,8 @@ function Event(node) {
         const record = _freedom__WEBPACK_IMPORTED_MODULE_2__.eventStore.get(node), result = {};
         for (let eventName in record) {
             result[eventName] = [];
-            for (let i = 0; i < record[eventName].length; i++) {
-                result[eventName][i] = {};
-                for (let member in record[eventName][i]) {
-                    result[eventName][i][member] = record[eventName][i][member];
-                }
-            }
+            for (let i = 0; i < record[eventName].length; i++)
+                result[eventName][i] = record[eventName][i];
         }
         return result;
     }
@@ -372,14 +389,11 @@ function Children(element) {
             result.push(_index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(item));
         else if (test == "Text") {
             const node = _index__WEBPACK_IMPORTED_MODULE_1__.vDOM.parseNode(item);
-            if (node !== null)
+            if (node !== undefined)
                 result.push(node);
         }
     }
-    if (result.length == 0)
-        return null;
-    else
-        return result;
+    return result;
 }
 
 
@@ -456,6 +470,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "buildNode": () => (/* binding */ buildNode),
 /* harmony export */   "createVElement": () => (/* binding */ createVElement),
 /* harmony export */   "createVText": () => (/* binding */ createVText),
+/* harmony export */   "diff": () => (/* reexport module object */ _vdom_diff__WEBPACK_IMPORTED_MODULE_4__),
 /* harmony export */   "get": () => (/* reexport module object */ _vdom_get__WEBPACK_IMPORTED_MODULE_2__),
 /* harmony export */   "misc": () => (/* reexport module object */ _vdom_misc__WEBPACK_IMPORTED_MODULE_1__),
 /* harmony export */   "parseNode": () => (/* binding */ parseNode)
@@ -464,6 +479,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vdom_misc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./vdom.misc */ "./src/utils/vdom.misc.ts");
 /* harmony import */ var _vdom_get__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./vdom.get */ "./src/utils/vdom.get.ts");
 /* harmony import */ var _vdom_build__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./vdom.build */ "./src/utils/vdom.build.ts");
+/* harmony import */ var _vdom_diff__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./vdom.diff */ "./src/utils/vdom.diff.ts");
 
 
 
@@ -474,7 +490,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function createVElement(tagName, attrs, events, children, instance) {
+
+
+function createVElement(id, tagName, attrs, events, children, instance) {
     if (typeof tagName != "string")
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("tagName", "string", tagName);
     if (attrs !== null && attrs.toString() != "[object Object]")
@@ -486,44 +504,39 @@ function createVElement(tagName, attrs, events, children, instance) {
     if (instance !== null && !(instance instanceof Element))
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("instance", "Element", instance);
     return {
-        id: _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15),
+        id,
         tagName: tagName.toLocaleLowerCase(),
         attrs,
         events,
-        children,
+        children: children,
         instance
     };
 }
-function createVText(text, instance) {
+function createVText(id, text, instance) {
     if (instance !== null && !(instance instanceof Text))
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("instance", "Text", instance);
     if (typeof text == "string")
         return {
-            id: _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15),
+            id,
             text,
             instance
         };
-    else if (text === null)
-        return null;
-    else {
+    else
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("text", "string | null", text);
-        return null;
-    }
 }
 function parseNode(node) {
-    const test = _vdom_misc__WEBPACK_IMPORTED_MODULE_1__.testNodeType(node);
+    const test = _vdom_misc__WEBPACK_IMPORTED_MODULE_1__.testNodeType(node), id = _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.randoma2Z(15);
     if (test == "Text") {
-        const text = node;
-        return createVText(_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.processNLIText(text), text);
+        const textNode = node, NLIresult = _vdom_misc__WEBPACK_IMPORTED_MODULE_1__.processNLIText(textNode);
+        if (NLIresult !== null)
+            return createVText(id, NLIresult, textNode);
     }
     else if (test == "Element") {
-        const element = node;
-        return createVElement(element.tagName, _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Attr(element), _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Event(element), _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Children(element), element);
+        const element = node, result = createVElement(id, element.tagName, _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Attr(element), _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Event(element), _vdom_get__WEBPACK_IMPORTED_MODULE_2__.Children(element), element);
+        return result;
     }
-    else {
+    else
         _utils_index__WEBPACK_IMPORTED_MODULE_0__.generic.E("node", "instance", node);
-        return null;
-    }
 }
 function buildNode(vDOM) {
     if (_vdom_misc__WEBPACK_IMPORTED_MODULE_1__.isVElement(vDOM)) {

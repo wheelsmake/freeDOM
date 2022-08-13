@@ -6,8 +6,8 @@ declare class ScopeInstance {
     get rootNode(): Element;
     get options(): fdOptions | undefined;
     get vDOM(): vElement | undefined;
-    m(): void;
-    mount(): void;
+    m(location: string | vElement, index: number | string, subTree: vDOM): void;
+    mount(location: string | vElement, index: number | string, subTree: vDOM): void;
     u(): void;
     unmount(): void;
     s(): void;
@@ -16,14 +16,14 @@ declare class ScopeInstance {
     rsync(): void;
 }
 declare const FreeDOM: {
-    new(rootNode: Elementy, options?: fdOptions | undefined): ScopeInstance;
+    new(rootNode: Elementy, options?: fdOptions): ScopeInstance;
     readonly instances: ScopeInstance[];
     readonly eventStore: Map<Element, eventRecord>;
     c(tagName: string, attrs?: SSkvObject | null, children?: childrenArray): vElement;
     createVElement(tagName: string, attrs?: SSkvObject | null, children?: childrenArray): vElement;
     h(tagName: string, attrs?: SSkvObject | null, children?: childrenArray): vElement;
-    t(text: string): vText;
-    createVText(text: string): vText;
+    t(text: string): vText | null;
+    createVText(text: string): vText | null;
     p(node: Node): vDOM | null;
     parseNode(node: Node): vDOM | null;
     b(vElement: vDOM): instance;

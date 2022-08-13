@@ -9,7 +9,11 @@ export function reduceToElement(input :Elementy) :Element{
     else if(typeof input == "string"){
         const el = utils.element.e(input);
         if(el instanceof Node) return el as Element;
+        else utils.generic.E("rootNode", "string | Element", input, "rootNode should be a VALID #id selector"); //fixed:现在不会走到new Element()那儿了
     }
     else utils.generic.E("rootNode", "string | Element", input, "rootNode should be a #id selector or an Element");
-    return new Element(); //hack:ts真无聊
+    return new Element(); //ts真无聊
+}
+export function pushSearchStore(searchStore :searchStore, searchBlock :searchBlock) :void{
+    //id基本不可能重复，vDOM是独立object，不可能判定相等，由于一个
 }
