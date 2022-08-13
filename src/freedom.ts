@@ -140,15 +140,14 @@ class ScopeInstance{
         //开发模式记录
         console.info("creating new freeDOM instance with rootNode", rootNode, "and options", options);
 
-        function rootNodeE() :void{utils.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");}
         //输入rootNode
-        rootNode = utils.arguments.reduceToElement(rootNode) || rootNodeE()!; 
+        rootNode = utils.arguments.reduceToElement(rootNode)!; 
         this.#rootNode = rootNode;
 
         //获取vDOM并检测其合法性
         const tree = localUtils.vDOM.parseNode(rootNode);
         if(localUtils.vDOM.misc.isVText(tree) || tree === null){
-            rootNodeE();
+            utils.generic.E("rootNode", "Elementy", rootNode, "rootNode should be an Element or a #id selector");
             throw new Error(); //hack
         }
         else this.#vDOM = tree as vElement; //ts真无聊
