@@ -6,7 +6,7 @@ import * as utils from "../../utils/index";
 import * as localUtils from "./utils/index";
 
 //开发模式记录
-console.info("freeDOM ©LJM12914. https://github.com/openink/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
+console.info("freeDOM ©LJM12914. https://github.com/wheelsmake/freeDOM \r\nYou are using an unminified version of freeDOM, which is not suitable for production use.");
 
 //事件捕获相关hack变量
 const instances :ScopeInstance[] = [], eventStore :eventStore = new Map(); //Map浏览器支持率＞96% on 2022.7.23
