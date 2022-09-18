@@ -54,7 +54,7 @@ export function parseNode(node :Node) :vDOM | void{
     const test = misc.testNodeType(node), id = utils.generic.randoma2Z(15);
     if(test == "Text"){
         const textNode = node as Text,
-              NLIresult = misc.processNLIText(textNode);
+              NLIresult = utils.element.processNLIText(textNode);
         if(NLIresult !== null) return createVText(id, NLIresult , textNode)!;
         //fixed:太多方法将null作为错误返回值了，其实应该返回void的
     }
